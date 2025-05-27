@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>QC Review Dashboard</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; }
+    th { background-color: #f0f0f0; }
+    input[type="text"] { width: 100%; }
+  </style>
+</head>
+<body>
+
+  <h2>QC Review Dashboard</h2>
+  <label>Start Date: <input type="date" id="startDate"></label>
+  <label>End Date: <input type="date" id="endDate"></label>
+  <button onclick="loadAndFilterCSV()">Filter</button>
+
+  <div id="table-container">Loading...</div>
+
+  <script>
+    const CSV_URL = 'https://docs.google.com/spreadsheets/d/1EiI4vOQ4Fcq80YaOxosEqFZ49sftVBH-jbp4xARqfWM/gviz/tq?tqx=out:csv&sheet=All-Data';
+
+    function loadAndFilterCSV() {
+      fetch(CSV_URL)
+        .then(response => response.text())
+        .then(csvText => {
+          Papa.parse(csvText, {
+            header: true,
+            skipEmptyLines: true,
+            complete: function(results) {
+              const data = results.data;
+              const startDate = document.getElementById('startDate').value;
+              const endDate = document.getElementById('endDate').value;
+              const filtered = data.filter(row => {
+                const rowDate = row['Date']?.split('T')[0]; // adjust if date format is different
+                return row['QC'] && (!startDate || rowDate >= startDate) && (!endDate || rowDate <= endDate);
+              });
+              renderTable(filtered);
+            }
+          });
+        });
+    }
+
+    function renderTable(data) {
+      if (!data.length) {
+        document.getElementById("table-container").innerHTML = "No matching data.";
+        return;
+      }
+
+      let html = `<table><tr>
+        <th>Spin ID</th><th>Sku ID</th><th>Issue</th><th>QC</th>
+        <th>Comment</th><th>Feedback</th><th>Submit</th></tr>`;
+
+      data.forEach((row, i) => {
+        html += `<tr>
+          <td>${row['Spin ID']}</td>
+          <td>${row['Sku ID']}</td>
+          <td>${row['Issue']}</td>
+          <td>${row['QC']}</td>
+          <td><input type="text" id="comment_${i}" /></td>
+          <td><input type="text" id="feedback_${i}" /></td>
+          <td><button onclick="submitReview('${row['Spin ID']}', '${row['Sku ID']}', '${row['QC']}', ${i})">Submit</button></td>
+        </tr>`;
+      });
+
+      html += `</table>`;
+      document.getElementById("table-container").innerHTML = html;
+    }
+
+    function submitReview(spinId, skuId, qc, i) {
+      const comment = document.getElementById(`comment_${i}`).value;
+      const feedback = document.getElementById(`feedback_${i}`).value;
+
+      // --- 🔁 Replace this part with integration to log data ---
+      console.log("Saving:", { spinId, skuId, qc, comment, feedback });
+
+      // Optional: post to Google Apps Script or Webhook
+      alert("Submitted (check console log for simulated save).");
+    }
+
+    // Set default date range (last 7 days)
+    window.onload = () => {
+      const today = new Date().toISOString().split('T')[0];
+      const lastWeek = new Date();
+      lastWeek.setDate(lastWeek.getDate() - 7);
+      document.getElementById('endDate').value = today;
+      document.getElementById('startDate').value = lastWeek.toISOString().split('T')[0];
+      loadAndFilterCSV();
+    };
+  </script>
+
+</body>
+</html>
