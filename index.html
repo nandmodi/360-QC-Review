@@ -104,10 +104,8 @@
         if (row['QC']) qcSet.add(row['QC']);
         if (row['Enterprise']) entSet.add(row['Enterprise']);
       });
-      const qcFilter = document.getElementById('qcFilter');
-      const entFilter = document.getElementById('enterpriseFilter');
-      qcFilter.innerHTML = '<option value="">All</option>' + [...qcSet].map(v => `<option>${v}</option>`).join('');
-      entFilter.innerHTML = '<option value="">All</option>' + [...entSet].map(v => `<option>${v}</option>`).join('');
+      document.getElementById('qcFilter').innerHTML = '<option value="">All</option>' + [...qcSet].map(v => `<option>${v}</option>`).join('');
+      document.getElementById('enterpriseFilter').innerHTML = '<option value="">All</option>' + [...entSet].map(v => `<option>${v}</option>`).join('');
     }
 
     function applyFilters() {
@@ -140,11 +138,11 @@
 
       data.forEach((row, i) => {
         html += `<tr>
-          <td>${row['Spin_ID']}</td>
-          <td>${row['SKU_ID']}</td>
-          <td>${row['Issue']}</td>
-          <td>${row['Enterprise']}</td>
-          <td>${row['QC']}</td>
+          <td>${row['Spin_ID'] || ''}</td>
+          <td>${row['SKU_ID'] || ''}</td>
+          <td>${row['Issue'] || ''}</td>
+          <td>${row['Enterprise'] || ''}</td>
+          <td>${row['QC'] || ''}</td>
           <td><input type="text" id="comment_${i}" /></td>
           <td><button onclick="submitFormRow(${i})" id="btn_${i}">Submit</button></td>
         </tr>`;
@@ -156,8 +154,8 @@
 
     function submitFormRow(i) {
       const row = filteredData[i];
-      const spinId = row['Spin ID'] || '';
-      const skuId = row['Sku ID'] || '';
+      const spinId = row['Spin_ID'] || '';
+      const skuId = row['SKU_ID'] || '';
       const enterprise = row['Enterprise'] || '';
       const qc = row['QC'] || '';
       const issue = row['Issue'] || '';
