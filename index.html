@@ -1,35 +1,86 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>QC Review Dashboard</title>
-  <link rel="icon" href="https://spyne-prod-ai.s3.us-east-1.amazonaws.com/ai-dataset/2025/favicon.ico" type="image/x-icon" />
+  <link rel="icon" href="https://spyne-prod-ai.s3.us-east-1.amazonaws.com/ai-dataset/2025/favicon.ico" type="image/x-icon">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
   <style>
-    body { font-family: Arial; padding: 20px; }
-    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-    th, td { border: 1px solid #ccc; padding: 8px; }
-    th { background-color: #f0f0f0; }
-    input[type="text"], select { width: 100%; padding: 4px; }
-    label { margin-right: 15px; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f9f9f9;
+      padding: 30px;
+      margin: 0;
+    }
+    h2 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .filters label {
+      display: flex;
+      flex-direction: column;
+      font-size: 14px;
+      color: #333;
+    }
+    .filters input, .filters select {
+      padding: 6px 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin-top: 5px;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      align-self: end;
+      height: 38px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: left;
+      font-size: 14px;
+    }
+    th {
+      background-color: #f0f0f0;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 6px;
+      box-sizing: border-box;
+    }
   </style>
 </head>
 <body>
 
   <h2>QC Review Dashboard</h2>
-  
-  <label>Start Date: <input type="date" id="startDate"></label>
-  <label>End Date: <input type="date" id="endDate"></label>
-  <label>User: 
-    <select id="qcFilter">
-      <option value="">All</option>
-    </select>
-  </label>
-  <label>Enterprise: 
-    <select id="enterpriseFilter">
-      <option value="">All</option>
-    </select>
-  </label>
-  <button onclick="loadAndFilterCSV()">Filter</button>
+  <div class="filters">
+    <label>Start Date: <input type="date" id="startDate"></label>
+    <label>End Date: <input type="date" id="endDate"></label>
+    <label>User: <select id="qcFilter"></select></label>
+    <label>Enterprise: <select id="enterpriseFilter"></select></label>
+    <button onclick="applyFilters()">Filter</button>
+  </div>
 
   <div id="table-container">Loading...</div>
 
@@ -39,7 +90,7 @@
 
     let globalData = [];
 
-    function loadAndFilterCSV() {
+    function loadAndInitialize() {
       fetch(CSV_URL)
         .then(response => response.text())
         .then(csvText => {
@@ -48,51 +99,41 @@
             skipEmptyLines: true,
             complete: function(results) {
               globalData = results.data;
-              populateDropdowns(globalData);
+              populateDropdowns();
               applyFilters();
             }
           });
         });
     }
 
-    function populateDropdowns(data) {
+    function populateDropdowns() {
       const qcSet = new Set();
       const enterpriseSet = new Set();
 
-      data.forEach(row => {
+      globalData.forEach(row => {
         if (row['QC']) qcSet.add(row['QC']);
         if (row['Enterprise']) enterpriseSet.add(row['Enterprise']);
       });
 
-      const qcSelect = document.getElementById("qcFilter");
-      const enterpriseSelect = document.getElementById("enterpriseFilter");
+      const qcFilter = document.getElementById('qcFilter');
+      const enterpriseFilter = document.getElementById('enterpriseFilter');
 
-      // Reset
-      qcSelect.innerHTML = `<option value="">All</option>`;
-      enterpriseSelect.innerHTML = `<option value="">All</option>`;
-
-      [...qcSet].sort().forEach(qc => {
-        qcSelect.innerHTML += `<option value="${qc}">${qc}</option>`;
-      });
-
-      [...enterpriseSet].sort().forEach(ent => {
-        enterpriseSelect.innerHTML += `<option value="${ent}">${ent}</option>`;
-      });
+      qcFilter.innerHTML = '<option value="">All</option>' + [...qcSet].sort().map(val => `<option value="${val}">${val}</option>`).join('');
+      enterpriseFilter.innerHTML = '<option value="">All</option>' + [...enterpriseSet].sort().map(val => `<option value="${val}">${val}</option>`).join('');
     }
 
     function applyFilters() {
       const startDate = document.getElementById('startDate').value;
       const endDate = document.getElementById('endDate').value;
-      const selectedQC = document.getElementById('qcFilter').value;
-      const selectedEnterprise = document.getElementById('enterpriseFilter').value;
+      const qcFilter = document.getElementById('qcFilter').value;
+      const enterpriseFilter = document.getElementById('enterpriseFilter').value;
 
       const filtered = globalData.filter(row => {
         const rowDate = row['Date']?.split('T')[0];
-        return row['QC'] &&
-          (!startDate || rowDate >= startDate) &&
-          (!endDate || rowDate <= endDate) &&
-          (!selectedQC || row['QC'] === selectedQC) &&
-          (!selectedEnterprise || row['Enterprise'] === selectedEnterprise);
+        return (!startDate || rowDate >= startDate) &&
+               (!endDate || rowDate <= endDate) &&
+               (!qcFilter || row['QC'] === qcFilter) &&
+               (!enterpriseFilter || row['Enterprise'] === enterpriseFilter);
       });
 
       renderTable(filtered);
@@ -100,13 +141,14 @@
 
     function renderTable(data) {
       if (!data.length) {
-        document.getElementById("table-container").innerHTML = "No matching data.";
+        document.getElementById('table-container').innerHTML = '<p>No matching data found.</p>';
         return;
       }
 
-      let html = `<table><tr>
+      let html = `<table><thead><tr>
         <th>Spin ID</th><th>Sku ID</th><th>Issue</th><th>Enterprise</th><th>QC</th>
-        <th>Comment</th><th>Submit</th></tr>`;
+        <th>Comment</th><th>Submit</th>
+      </tr></thead><tbody>`;
 
       data.forEach((row, i) => {
         const spinId = encodeURIComponent(row['Spin ID'] || '');
@@ -122,14 +164,12 @@
           <td>${row['Enterprise'] || ''}</td>
           <td>${row['QC'] || ''}</td>
           <td><input type="text" id="comment_${i}" /></td>
-          <td><button onclick="submitReview(
-            '${spinId}', '${skuId}', '${enterprise}', '${qc}', '${issue}', ${i}
-          )">Submit</button></td>
+          <td><button onclick="submitReview('${spinId}', '${skuId}', '${enterprise}', '${qc}', '${issue}', ${i})">Submit</button></td>
         </tr>`;
       });
 
-      html += `</table>`;
-      document.getElementById("table-container").innerHTML = html;
+      html += '</tbody></table>';
+      document.getElementById('table-container').innerHTML = html;
     }
 
     function submitReview(spinIdEnc, skuIdEnc, enterpriseEnc, qcEnc, issueEnc, i) {
@@ -140,16 +180,10 @@
       const issue = decodeURIComponent(issueEnc);
       const comment = document.getElementById(`comment_${i}`).value;
 
-      console.log("Saving:", { spinId, skuId, enterprise, qc, issue, comment });
-
       fetch(WEB_APP_URL, {
         method: 'POST',
-        body: JSON.stringify({
-          spinId, skuId, enterprise, qc, issue
-        }),
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        body: JSON.stringify({ spinId, skuId, enterprise, qc, issue }),
+        headers: { 'Content-Type': 'application/json' }
       })
       .then(res => res.text())
       .then(msg => alert("Submitted: " + msg))
@@ -162,9 +196,8 @@
       lastWeek.setDate(lastWeek.getDate() - 7);
       document.getElementById('endDate').value = today;
       document.getElementById('startDate').value = lastWeek.toISOString().split('T')[0];
-      loadAndFilterCSV();
+      loadAndInitialize();
     };
   </script>
-
 </body>
 </html>
