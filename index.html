@@ -22,7 +22,7 @@
   <div id="table-container">Loading...</div>
 
   <script>
-    loadCSV('https://docs.google.com/spreadsheets/d/1JlcXL8X1VRxlRVGyTuLElsm9IgOiteT6amOEXrEx-jY/gviz/tq?tqx=out:csv&sheet=Data');
+    const CSV_URL = 'https://docs.google.com/spreadsheets/d/1JlcXL8X1VRxlRVGyTuLElsm9IgOiteT6amOEXrEx-jY/gviz/tq?tqx=out:csv&sheet=Data';
 
     function loadAndFilterCSV() {
       fetch(CSV_URL)
@@ -52,18 +52,18 @@
       }
 
       let html = `<table><tr>
-        <th>Spin ID</th><th>Sku ID</th><th>Issue</th><th>QC</th>
-        <th>Comment</th><th>Feedback</th><th>Submit</th></tr>`;
+        <th>Spin ID</th><th>Sku ID</th><th>Issue</th><th>Enterprise</th><th>QC</th>
+        <th>Comment</th><th>Submit</th></tr>`;
 
       data.forEach((row, i) => {
         html += `<tr>
           <td>${row['Spin ID']}</td>
           <td>${row['Sku ID']}</td>
           <td>${row['Issue']}</td>
+          <td>${row['Enterprise'] || ''}</td>
           <td>${row['QC']}</td>
           <td><input type="text" id="comment_${i}" /></td>
-          <td><input type="text" id="feedback_${i}" /></td>
-          <td><button onclick="submitReview('${row['Spin ID']}', '${row['Sku ID']}', '${row['QC']}', ${i})">Submit</button></td>
+          <td><button onclick="submitReview('${row['Spin ID']}', '${row['Sku ID']}', '${row['Enterprise']}', '${row['QC']}', ${i})">Submit</button></td>
         </tr>`;
       });
 
@@ -71,14 +71,12 @@
       document.getElementById("table-container").innerHTML = html;
     }
 
-    function submitReview(spinId, skuId, qc, i) {
+    function submitReview(spinId, skuId, enterprise, qc, i) {
       const comment = document.getElementById(`comment_${i}`).value;
-      const feedback = document.getElementById(`feedback_${i}`).value;
 
-      // --- 🔁 Replace this part with integration to log data ---
-      console.log("Saving:", { spinId, skuId, qc, comment, feedback });
+      // 🔁 Replace this part with integration to log data
+      console.log("Saving:", { spinId, skuId, enterprise, qc, comment });
 
-      // Optional: post to Google Apps Script or Webhook
       alert("Submitted (check console log for simulated save).");
     }
 
