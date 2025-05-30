@@ -9,14 +9,26 @@
     table { border-collapse: collapse; width: 100%; margin-top: 20px; }
     th, td { border: 1px solid #ccc; padding: 8px; }
     th { background-color: #f0f0f0; }
-    input[type="text"] { width: 100%; }
+    input[type="text"], select { width: 100%; padding: 4px; }
+    label { margin-right: 15px; }
   </style>
 </head>
 <body>
 
   <h2>QC Review Dashboard</h2>
+  
   <label>Start Date: <input type="date" id="startDate"></label>
   <label>End Date: <input type="date" id="endDate"></label>
+  <label>User: 
+    <select id="qcFilter">
+      <option value="">All</option>
+    </select>
+  </label>
+  <label>Enterprise: 
+    <select id="enterpriseFilter">
+      <option value="">All</option>
+    </select>
+  </label>
   <button onclick="loadAndFilterCSV()">Filter</button>
 
   <div id="table-container">Loading...</div>
@@ -24,6 +36,8 @@
   <script>
     const CSV_URL = 'https://docs.google.com/spreadsheets/d/1JlcXL8X1VRxlRVGyTuLElsm9IgOiteT6amOEXrEx-jY/gviz/tq?tqx=out:csv&sheet=Data';
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzAT4uN3mUO0bTAV3j1Ikcl8zNLbMnhuEryWxMTfNAQzuJVuiz9J9CWUPxHDKqXc3QAlA/exec';
+
+    let globalData = [];
 
     function loadAndFilterCSV() {
       fetch(CSV_URL)
@@ -33,20 +47,55 @@
             header: true,
             skipEmptyLines: true,
             complete: function(results) {
-              const data = results.data;
-              const startDate = document.getElementById('startDate').value;
-              const endDate = document.getElementById('endDate').value;
-
-              const filtered = data.filter(row => {
-                const rowDate = row['Date']?.split('T')[0];
-                return row['QC'] && (!startDate || rowDate >= startDate) && (!endDate || rowDate <= endDate);
-              });
-
-              console.log("Available headers:", Object.keys(data[0])); // debug
-              renderTable(filtered);
+              globalData = results.data;
+              populateDropdowns(globalData);
+              applyFilters();
             }
           });
         });
+    }
+
+    function populateDropdowns(data) {
+      const qcSet = new Set();
+      const enterpriseSet = new Set();
+
+      data.forEach(row => {
+        if (row['QC']) qcSet.add(row['QC']);
+        if (row['Enterprise']) enterpriseSet.add(row['Enterprise']);
+      });
+
+      const qcSelect = document.getElementById("qcFilter");
+      const enterpriseSelect = document.getElementById("enterpriseFilter");
+
+      // Reset
+      qcSelect.innerHTML = `<option value="">All</option>`;
+      enterpriseSelect.innerHTML = `<option value="">All</option>`;
+
+      [...qcSet].sort().forEach(qc => {
+        qcSelect.innerHTML += `<option value="${qc}">${qc}</option>`;
+      });
+
+      [...enterpriseSet].sort().forEach(ent => {
+        enterpriseSelect.innerHTML += `<option value="${ent}">${ent}</option>`;
+      });
+    }
+
+    function applyFilters() {
+      const startDate = document.getElementById('startDate').value;
+      const endDate = document.getElementById('endDate').value;
+      const selectedQC = document.getElementById('qcFilter').value;
+      const selectedEnterprise = document.getElementById('enterpriseFilter').value;
+
+      const filtered = globalData.filter(row => {
+        const rowDate = row['Date']?.split('T')[0];
+        return row['QC'] &&
+          (!startDate || rowDate >= startDate) &&
+          (!endDate || rowDate <= endDate) &&
+          (!selectedQC || row['QC'] === selectedQC) &&
+          (!selectedEnterprise || row['Enterprise'] === selectedEnterprise);
+      });
+
+      renderTable(filtered);
     }
 
     function renderTable(data) {
