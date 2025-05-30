@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-<link rel="icon" href="https://spyne-prod-ai.s3.us-east-1.amazonaws.com/ai-dataset/2025/favicon.ico" type="image/x-icon" />
   <title>QC Review Dashboard</title>
+  <link rel="icon" href="https://spyne-prod-ai.s3.us-east-1.amazonaws.com/ai-dataset/2025/favicon.ico" type="image/x-icon" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
   <style>
     body { font-family: Arial; padding: 20px; }
@@ -22,7 +22,7 @@
   <div id="table-container">Loading...</div>
 
   <script>
-    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vThoeXNovzUYQaHoFqHYY8p4hxrGTJWUPF8dQs0cinxvypfUVwAzFu74l06jhqXm0x611kRke13fa2t/pub?gid=0&single=true&output=csv&sheet=Spot-QC';
+    const CSV_URL = 'https://docs.google.com/spreadsheets/d/1JlcXL8X1VRxlRVGyTuLElsm9IgOiteT6amOEXrEx-jY/gviz/tq?tqx=out:csv&sheet=Data';
 
     function loadAndFilterCSV() {
       fetch(CSV_URL)
@@ -36,7 +36,7 @@
               const startDate = document.getElementById('startDate').value;
               const endDate = document.getElementById('endDate').value;
               const filtered = data.filter(row => {
-                const rowDate = row['Date']?.split('T')[0]; // adjust if date format is different
+                const rowDate = row['Date']?.split('T')[0];
                 return row['QC'] && (!startDate || rowDate >= startDate) && (!endDate || rowDate <= endDate);
               });
               renderTable(filtered);
@@ -56,14 +56,19 @@
         <th>Comment</th><th>Submit</th></tr>`;
 
       data.forEach((row, i) => {
+        const spinId = encodeURIComponent(row['Spin ID'] || '');
+        const skuId = encodeURIComponent(row['Sku ID'] || '');
+        const enterprise = encodeURIComponent(row['Enterprise'] || '');
+        const qc = encodeURIComponent(row['QC'] || '');
+
         html += `<tr>
-          <td>${row['Spin ID']}</td>
-          <td>${row['Sku ID']}</td>
-          <td>${row['Issue']}</td>
+          <td>${row['Spin ID'] || ''}</td>
+          <td>${row['Sku ID'] || ''}</td>
+          <td>${row['Issue'] || ''}</td>
           <td>${row['Enterprise'] || ''}</td>
-          <td>${row['QC']}</td>
+          <td>${row['QC'] || ''}</td>
           <td><input type="text" id="comment_${i}" /></td>
-          <td><button onclick="submitReview('${row['Spin ID']}', '${row['Sku ID']}', '${row['Enterprise']}', '${row['QC']}', ${i})">Submit</button></td>
+          <td><button onclick="submitReview('${spinId}', '${skuId}', '${enterprise}', '${qc}', ${i})">Submit</button></td>
         </tr>`;
       });
 
@@ -71,16 +76,17 @@
       document.getElementById("table-container").innerHTML = html;
     }
 
-    function submitReview(spinId, skuId, enterprise, qc, i) {
+    function submitReview(spinIdEnc, skuIdEnc, enterpriseEnc, qcEnc, i) {
+      const spinId = decodeURIComponent(spinIdEnc);
+      const skuId = decodeURIComponent(skuIdEnc);
+      const enterprise = decodeURIComponent(enterpriseEnc);
+      const qc = decodeURIComponent(qcEnc);
       const comment = document.getElementById(`comment_${i}`).value;
 
-      // 🔁 Replace this part with integration to log data
       console.log("Saving:", { spinId, skuId, enterprise, qc, comment });
-
       alert("Submitted (check console log for simulated save).");
     }
 
-    // Set default date range (last 7 days)
     window.onload = () => {
       const today = new Date().toISOString().split('T')[0];
       const lastWeek = new Date();
