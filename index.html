@@ -75,8 +75,12 @@
   </div>
 
   <div id="table-container">Loading...</div>
+
 <script>
-  const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vThoeXNovzUYQaHoFqHYY8p4hxrGTJWUPF8dQs0cinxvypfUVwAzFu74l06jhqXm0x611kRke13fa2t/pub?gid=0&single=true&output=csv&sheet=Spot-QC';
+  // Replace with your published Google Sheets CSV URL
+  const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vThoeXNovzUYQaHoFqHYY8p4hxrGTJWUPF8dQs0cinxvypfUVwAzFu74l06jhqXm0x611kRke13fa2t/pub?gid=0&single=true&output=csv';
+
+  // Your Google Form submission URL (must end with /formResponse)
   const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeQH6R9-rYr1Kh2rwUBKu7uGvJAkRrvx8fnxF6jfkac7sNL2A/formResponse';
 
   let globalData = [];
@@ -93,6 +97,16 @@
       .replace(/'/g, "&#39;");
   }
 
+  // Escape for form input attribute values
+  function escapeHtmlAttr(text) {
+    if (!text) return '';
+    return text.replace(/&/g, "&amp;")
+               .replace(/"/g, "&quot;")
+               .replace(/'/g, "&#39;")
+               .replace(/</g, "&lt;")
+               .replace(/>/g, "&gt;");
+  }
+
   // Load CSV and initialize dropdowns & table
   function loadAndFilterCSV() {
     fetch(CSV_URL)
@@ -101,13 +115,13 @@
         Papa.parse(csv, {
           header: true,
           skipEmptyLines: true,
-          transformHeader: header => header.trim(),
-          complete: function(results) {
+          transformHeader: h => h.trim(),
+          complete: results => {
             globalData = results.data;
             populateDropdowns();
             applyFilters();
           },
-          error: function(err) {
+          error: err => {
             document.getElementById('table-container').innerText = 'Error loading data.';
             console.error('CSV load error:', err);
           }
@@ -188,64 +202,63 @@
     html += '</table>';
     document.getElementById('table-container').innerHTML = html;
   }
-  // Escape for form input values (attribute context)
-  function escapeHtmlAttr(text) {
-    if (!text) return '';
-    return text.replace(/&/g, "&amp;")
-               .replace(/"/g, "&quot;")
-               .replace(/'/g, "&#39;")
-               .replace(/</g, "&lt;")
-               .replace(/>/g, "&gt;");
-  }
 
-  // Submit single row form data to Google Form and disable button
+  // Submit form data to Google Form and disable button after submission
   function submitFormRow(i) {
-  try {
-    const row = filteredData[i];
-    const spinId = escapeHtmlAttr(row['Spin_ID'] || '');
-    const skuId = escapeHtmlAttr(row['SKU_ID'] || '');
-    const enterprise = escapeHtmlAttr(row['Enterprise'] || '');
-    const user = escapeHtmlAttr(row['User'] || '');
-    const issue = escapeHtmlAttr(row['Issues'] || '');
-    const comment = escapeHtmlAttr(document.getElementById(`comment_${i}`).value);
+    try {
+      const row = filteredData[i];
+      const spinId = escapeHtmlAttr(row['Spin_ID'] || '');
+      const skuId = escapeHtmlAttr(row['SKU_ID'] || '');
+      const enterprise = escapeHtmlAttr(row['Enterprise'] || '');
+      const user = escapeHtmlAttr(row['User'] || '');
+      const issue = escapeHtmlAttr(row['Issues'] || '');
+      const comment = escapeHtmlAttr(document.getElementById(`comment_${i}`).value);
 
-    const form = document.createElement("form");
-    form.action = FORM_URL;
-    form.method = "POST";
-    form.target = "hidden_iframe";
-    form.style.display = "none";
+      const form = document.createElement("form");
+      form.action = FORM_URL;
+      form.method = "POST";
+      form.target = "hidden_iframe";
+      form.style.display = "none";
 
-    form.innerHTML = `
-      <input name="entry.1125049159" value="${spinId}">
-      <input name="entry.703277665" value="${skuId}">
-      <input name="entry.1815472287" value="${enterprise}">
-      <input name="entry.582537694" value="${user}">
-      <input name="entry.575622617" value="${issue}">
-      <input name="entry.1234567890" value="${comment}">
-    `;
+      form.innerHTML = `
+        <input name="entry.1125049159" value="${spinId}">
+        <input name="entry.703277665" value="${skuId}">
+        <input name="entry.1815472287" value="${enterprise}">
+        <input name="entry.582537694" value="${user}">
+        <input name="entry.575622617" value="${issue}">
+        <input name="entry.1234567890" value="${comment}">
+      `;
 
-    // Listen to hidden iframe load event to confirm submission
-    const iframe = document.getElementsByName('hidden_iframe')[0];
-    if (iframe) {
-      iframe.onload = function() {
-        console.log('Google Form submission response received for row:', i);
-        const btn = document.getElementById(`btn_${i}`);
-        if (btn) {
-          btn.disabled = true;
-          btn.innerText = "Submitted";
-        }
-      };
+      const iframe = document.getElementsByName('hidden_iframe')[0];
+      if (iframe) {
+        iframe.onload = function() {
+          console.log('Submission successful for row:', i);
+          const btn = document.getElementById(`btn_${i}`);
+          if (btn) {
+            btn.disabled = true;
+            btn.innerText = "Submitted";
+          }
+        };
+      }
+
+      document.body.appendChild(form);
+      console.log('Submitting form for row:', i);
+      form.submit();
+      document.body.removeChild(form);
+    } catch (error) {
+      console.error('Error submitting form row', i, error);
     }
-
-    document.body.appendChild(form);
-    console.log('Submitting form for row:', i);
-    form.submit();
-    document.body.removeChild(form);
-  } catch (error) {
-    console.error('Error during form submission for row', i, error);
   }
-}
 
+  // Initialize defaults and load CSV on page load
+  window.onload = () => {
+    const today = new Date().toISOString().split('T')[0];
+    const lastWeek = new Date();
+    lastWeek.setDate(lastWeek.getDate() - 7);
+    document.getElementById('endDate').value = today;
+    document.getElementById('startDate').value = lastWeek.toISOString().split('T')[0];
+    loadAndFilterCSV();
+  };
 </script>
 
 <iframe name="hidden_iframe" style="display:none;"></iframe>
