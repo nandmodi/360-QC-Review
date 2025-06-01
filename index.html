@@ -39,7 +39,6 @@
 
   <script>
     const CSV_URL = 'https://docs.google.com/spreadsheets/d/1JlcXL8X1VRxlRVGyTuLElsm9IgOiteT6amOEXrEx-jY/gviz/tq?tqx=out:csv&sheet=Data';
-    const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeQH6R9-rYr1Kh2rwUBKu7uGvJAkRrvx8fnxF6jfkac7sNL2A/formResponse';
 
     let globalData = [];
     let filteredData = [];
@@ -53,6 +52,7 @@
             skipEmptyLines: true,
             complete: function(results) {
               globalData = results.data;
+              console.log("CSV Headers:", Object.keys(globalData[0]));
               populateDropdowns();
               applyFilters();
             }
@@ -77,10 +77,12 @@
       const ent = document.getElementById('enterpriseFilter').value;
 
       filteredData = globalData.filter(row => {
-        const date = row['Date']?.split('T')[0];
+        const dateStr = row['Date'];
+        const rowDate = dateStr ? new Date(dateStr).toISOString().split('T')[0] : null;
+
         return row['User'] &&
-          (!start || date >= start) &&
-          (!end || date <= end) &&
+          (!start || rowDate >= start) &&
+          (!end || rowDate <= end) &&
           (!user || row['User'] === user) &&
           (!ent || row['Enterprise'] === ent);
       });
@@ -125,7 +127,7 @@
       const comment = document.getElementById(`comment_${i}`).value;
 
       const form = document.createElement("form");
-      form.action = FORM_URL;
+      form.action = 'https://docs.google.com/forms/d/e/1FAIpQLSeQH6R9-rYr1Kh2rwUBKu7uGvJAkRrvx8fnxF6jfkac7sNL2A/formResponse';
       form.method = "POST";
       form.target = "hidden_iframe";
 
