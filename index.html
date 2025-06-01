@@ -200,6 +200,7 @@
 
   // Submit single row form data to Google Form and disable button
   function submitFormRow(i) {
+  try {
     const row = filteredData[i];
     const spinId = escapeHtmlAttr(row['Spin_ID'] || '');
     const skuId = escapeHtmlAttr(row['SKU_ID'] || '');
@@ -223,23 +224,28 @@
       <input name="entry.1234567890" value="${comment}">
     `;
 
+    // Listen to hidden iframe load event to confirm submission
+    const iframe = document.getElementsByName('hidden_iframe')[0];
+    if (iframe) {
+      iframe.onload = function() {
+        console.log('Google Form submission response received for row:', i);
+        const btn = document.getElementById(`btn_${i}`);
+        if (btn) {
+          btn.disabled = true;
+          btn.innerText = "Submitted";
+        }
+      };
+    }
+
     document.body.appendChild(form);
+    console.log('Submitting form for row:', i);
     form.submit();
     document.body.removeChild(form);
-
-    const btn = document.getElementById(`btn_${i}`);
-    btn.disabled = true;
-    btn.innerText = "Submitted";
+  } catch (error) {
+    console.error('Error during form submission for row', i, error);
   }
+}
 
-  window.onload = () => {
-    const today = new Date().toISOString().split('T')[0];
-    const lastWeek = new Date();
-    lastWeek.setDate(lastWeek.getDate() - 7);
-    document.getElementById('endDate').value = today;
-    document.getElementById('startDate').value = lastWeek.toISOString().split('T')[0];
-    loadAndFilterCSV();
-  };
 </script>
 
 <iframe name="hidden_iframe" style="display:none;"></iframe>
