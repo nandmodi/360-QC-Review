@@ -6,17 +6,55 @@
   <link rel="icon" href="https://spyne-prod-ai.s3.us-east-1.amazonaws.com/ai-dataset/2025/favicon.ico" type="image/x-icon" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; padding: 30px; background: #f9f9f9; }
-    h2 { margin-bottom: 20px; color: #333; }
-    .filters { margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 20px; }
-    .filters label { display: flex; flex-direction: column; font-size: 14px; }
-    .filters input, .filters select { padding: 6px; font-size: 14px; }
-    table { border-collapse: collapse; width: 100%; background: #fff; margin-top: 10px; }
-    th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
-    th { background-color: #f0f0f0; }
-    button { padding: 6px 14px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
-    button:disabled { background-color: #ccc; cursor: not-allowed; }
-    input[type="text"] { width: 100%; padding: 6px; }
+    body {
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      background: #f9f9f9;
+    }
+    h2 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+    .filters {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .filters label {
+      display: flex;
+      flex-direction: column;
+      font-size: 14px;
+    }
+    .filters input, .filters select {
+      padding: 6px;
+      font-size: 14px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      background: #fff;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+    th {
+      background-color: #f0f0f0;
+    }
+    button {
+      padding: 6px 14px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
   </style>
 </head>
 <body>
@@ -39,6 +77,7 @@
 
   <script>
     const CSV_URL = 'https://docs.google.com/spreadsheets/d/1JlcXL8X1VRxlRVGyTuLElsm9IgOiteT6amOEXrEx-jY/gviz/tq?tqx=out:csv&sheet=Data';
+    const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeQH6R9-rYr1Kh2rwUBKu7uGvJAkRrvx8fnxF6jfkac7sNL2A/formResponse';
 
     let globalData = [];
     let filteredData = [];
@@ -52,7 +91,6 @@
             skipEmptyLines: true,
             complete: function(results) {
               globalData = results.data;
-              console.log("CSV Headers:", Object.keys(globalData[0]));
               populateDropdowns();
               applyFilters();
             }
@@ -63,7 +101,7 @@
     function populateDropdowns() {
       const qcSet = new Set(), entSet = new Set();
       globalData.forEach(row => {
-        if (row['User']) qcSet.add(row['User']);
+        if (row['QC']) qcSet.add(row['QC']);
         if (row['Enterprise']) entSet.add(row['Enterprise']);
       });
       document.getElementById('qcFilter').innerHTML = '<option value="">All</option>' + [...qcSet].map(v => `<option>${v}</option>`).join('');
@@ -77,13 +115,11 @@
       const ent = document.getElementById('enterpriseFilter').value;
 
       filteredData = globalData.filter(row => {
-        const dateStr = row['Date'];
-        const rowDate = dateStr ? new Date(dateStr).toISOString().split('T')[0] : null;
-
-        return row['User'] &&
-          (!start || rowDate >= start) &&
-          (!end || rowDate <= end) &&
-          (!user || row['User'] === user) &&
+        const date = row['Date']?.split('T')[0];
+        return row['QC'] &&
+          (!start || date >= start) &&
+          (!end || date <= end) &&
+          (!user || row['QC'] === user) &&
           (!ent || row['Enterprise'] === ent);
       });
 
@@ -97,17 +133,16 @@
       }
 
       let html = `<table id="qc-table"><tr>
-        <th>Spin ID</th><th>SKU ID</th><th>Issues</th><th>Enterprise</th><th>QC</th>
-        <th>spin_url</th><th>Comment</th><th>Submit</th></tr>`;
+        <th>Spin ID</th><th>SKU ID</th><th>Issue</th><th>Enterprise</th><th>QC</th>
+        <th>Comment</th><th>Submit</th></tr>`;
 
       data.forEach((row, i) => {
         html += `<tr>
-          <td>${row['Spin_ID'] || ''}</td>
-          <td>${row['SKU_ID'] || ''}</td>
-          <td>${row['Issues'] || ''}</td>
+          <td>${row['Spin ID'] || ''}</td>
+          <td>${row['SKU ID'] || ''}</td>
+          <td>${row['Issue'] || ''}</td>
           <td>${row['Enterprise'] || ''}</td>
-          <td>${row['User'] || ''}</td>
-          <td><a href="${row['spin_url']}" target="_blank">View</a></td>
+          <td>${row['QC'] || ''}</td>
           <td><input type="text" id="comment_${i}" /></td>
           <td><button onclick="submitFormRow(${i})" id="btn_${i}">Submit</button></td>
         </tr>`;
@@ -119,15 +154,15 @@
 
     function submitFormRow(i) {
       const row = filteredData[i];
-      const spinId = row['Spin_ID'] || '';
-      const skuId = row['SKU_ID'] || '';
+      const spinId = row['Spin ID'] || '';
+      const skuId = row['SKU ID'] || '';
       const enterprise = row['Enterprise'] || '';
-      const qc = row['User'] || '';
-      const issue = row['Issues'] || '';
+      const qc = row['QC'] || '';
+      const issue = row['Issue'] || '';
       const comment = document.getElementById(`comment_${i}`).value;
 
       const form = document.createElement("form");
-      form.action = 'https://docs.google.com/forms/d/e/1FAIpQLSeQH6R9-rYr1Kh2rwUBKu7uGvJAkRrvx8fnxF6jfkac7sNL2A/formResponse';
+      form.action = FORM_URL;
       form.method = "POST";
       form.target = "hidden_iframe";
 
