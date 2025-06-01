@@ -77,16 +77,12 @@
   <div id="table-container">Loading...</div>
 
 <script>
-  // Replace with your published Google Sheets CSV URL
   const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vThoeXNovzUYQaHoFqHYY8p4hxrGTJWUPF8dQs0cinxvypfUVwAzFu74l06jhqXm0x611kRke13fa2t/pub?gid=0&single=true&output=csv';
-
-  // Your Google Form submission URL (must end with /formResponse)
   const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeQH6R9-rYr1Kh2rwUBKu7uGvJAkRrvx8fnxF6jfkac7sNL2A/formResponse';
 
   let globalData = [];
   let filteredData = [];
 
-  // Escape HTML for safe rendering
   function escapeHtml(text) {
     if (!text) return '';
     return text
@@ -97,7 +93,6 @@
       .replace(/'/g, "&#39;");
   }
 
-  // Escape for form input attribute values
   function escapeHtmlAttr(text) {
     if (!text) return '';
     return text.replace(/&/g, "&amp;")
@@ -107,7 +102,6 @@
                .replace(/>/g, "&gt;");
   }
 
-  // Load CSV and initialize dropdowns & table
   function loadAndFilterCSV() {
     fetch(CSV_URL)
       .then(res => res.text())
@@ -132,7 +126,6 @@
       });
   }
 
-  // Populate User and Enterprise dropdown filters dynamically
   function populateDropdowns() {
     const userSet = new Set(), entSet = new Set();
     globalData.forEach(row => {
@@ -140,14 +133,13 @@
       if (row['Enterprise']) entSet.add(row['Enterprise']);
     });
     document.getElementById('userFilter').innerHTML =
-      '<option value="">All</option>' + 
+      '<option value="">All</option>' +
       [...userSet].map(v => `<option value="${v.trim()}">${escapeHtml(v)}</option>`).join('');
     document.getElementById('enterpriseFilter').innerHTML =
-      '<option value="">All</option>' + 
+      '<option value="">All</option>' +
       [...entSet].map(v => `<option value="${v.trim()}">${escapeHtml(v)}</option>`).join('');
   }
 
-  // Filter data based on selected filters and date range
   function applyFilters() {
     const start = document.getElementById('startDate').value;
     const end = document.getElementById('endDate').value;
@@ -168,7 +160,6 @@
     renderTable(filteredData);
   }
 
-  // Render the filtered data table with escaped content and line breaks in Issues
   function renderTable(data) {
     if (!data.length) {
       document.getElementById('table-container').innerHTML = 'No matching data.';
@@ -203,7 +194,6 @@
     document.getElementById('table-container').innerHTML = html;
   }
 
-  // Submit form data to Google Form and disable button after submission
   function submitFormRow(i) {
     try {
       const row = filteredData[i];
@@ -213,6 +203,7 @@
       const user = escapeHtmlAttr(row['User'] || '');
       const issue = escapeHtmlAttr(row['Issues'] || '');
       const comment = escapeHtmlAttr(document.getElementById(`comment_${i}`).value);
+      const spinUrl = escapeHtmlAttr(row['spin_url'] || '');
 
       const form = document.createElement("form");
       form.action = FORM_URL;
@@ -226,7 +217,8 @@
         <input name="entry.1815472287" value="${enterprise}">
         <input name="entry.582537694" value="${user}">
         <input name="entry.575622617" value="${issue}">
-        <input name="entry.1234567890" value="${comment}">
+        <input name="entry.1751143375" value="${comment}">
+        <input name="entry.1372347436" value="${spinUrl}">
       `;
 
       const iframe = document.getElementsByName('hidden_iframe')[0];
@@ -250,7 +242,6 @@
     }
   }
 
-  // Initialize defaults and load CSV on page load
   window.onload = () => {
     const today = new Date().toISOString().split('T')[0];
     const lastWeek = new Date();
