@@ -11,10 +11,7 @@
       padding: 30px;
       background: #f9f9f9;
     }
-    h2 {
-      margin-bottom: 20px;
-      color: #333;
-    }
+    h2 { margin-bottom: 20px; color: #333; }
     .filters {
       margin-bottom: 20px;
       display: flex;
@@ -40,9 +37,7 @@
       border: 1px solid #ccc;
       text-align: left;
     }
-    th {
-      background-color: #f0f0f0;
-    }
+    th { background-color: #f0f0f0; }
     button {
       padding: 6px 14px;
       background: #007bff;
@@ -74,7 +69,6 @@
   </div>
 
   <div id="table-container">Loading...</div>
-
   <script>
     const CSV_URL = 'https://docs.google.com/spreadsheets/d/1JlcXL8X1VRxlRVGyTuLElsm9IgOiteT6amOEXrEx-jY/gviz/tq?tqx=out:csv&sheet=Data';
     const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeQH6R9-rYr1Kh2rwUBKu7uGvJAkRrvx8fnxF6jfkac7sNL2A/formResponse';
@@ -89,6 +83,7 @@
           Papa.parse(csv, {
             header: true,
             skipEmptyLines: true,
+            transformHeader: header => header.trim(),
             complete: function(results) {
               globalData = results.data;
               populateDropdowns();
@@ -133,16 +128,20 @@
       }
 
       let html = `<table id="qc-table"><tr>
-        <th>Spin ID</th><th>SKU ID</th><th>Issue</th><th>Enterprise</th><th>QC</th>
+        <th>Spin ID</th><th>SKU ID</th><th>Issue</th><th>Enterprise</th><th>QC</th><th>Spin URL</th>
         <th>Comment</th><th>Submit</th></tr>`;
 
       data.forEach((row, i) => {
+        const spinId = row['Spin ID'] || '';
+        const skuId = row['SKU ID'] || '';
+        const spinURL = skuId ? `https://assets.spyne.ai/360?sku_id=${encodeURIComponent(skuId)}` : '';
         html += `<tr>
-          <td>${row['Spin ID'] || ''}</td>
-          <td>${row['SKU ID'] || ''}</td>
+          <td>${spinId}</td>
+          <td>${skuId}</td>
           <td>${row['Issue'] || ''}</td>
           <td>${row['Enterprise'] || ''}</td>
           <td>${row['QC'] || ''}</td>
+          <td><a href="${spinURL}" target="_blank">Link</a></td>
           <td><input type="text" id="comment_${i}" /></td>
           <td><button onclick="submitFormRow(${i})" id="btn_${i}">Submit</button></td>
         </tr>`;
@@ -151,7 +150,6 @@
       html += '</table>';
       document.getElementById('table-container').innerHTML = html;
     }
-
     function submitFormRow(i) {
       const row = filteredData[i];
       const spinId = row['Spin ID'] || '';
@@ -185,7 +183,8 @@
 
     window.onload = () => {
       const today = new Date().toISOString().split('T')[0];
-      const lastWeek = new Date(); lastWeek.setDate(lastWeek.getDate() - 7);
+      const lastWeek = new Date();
+      lastWeek.setDate(lastWeek.getDate() - 7);
       document.getElementById('endDate').value = today;
       document.getElementById('startDate').value = lastWeek.toISOString().split('T')[0];
       loadAndFilterCSV();
