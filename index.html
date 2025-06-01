@@ -69,6 +69,7 @@
   </div>
 
   <div id="table-container">Loading...</div>
+
   <script>
     const CSV_URL = 'https://docs.google.com/spreadsheets/d/1JlcXL8X1VRxlRVGyTuLElsm9IgOiteT6amOEXrEx-jY/gviz/tq?tqx=out:csv&sheet=Data';
     const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeQH6R9-rYr1Kh2rwUBKu7uGvJAkRrvx8fnxF6jfkac7sNL2A/formResponse';
@@ -110,10 +111,10 @@
       const ent = document.getElementById('enterpriseFilter').value;
 
       filteredData = globalData.filter(row => {
-        const date = row['Date'] ? new Date(row['Date']).toISOString().split('T')[0] : null;
+        const rawDate = row['Date'] ? row['Date'].split('T')[0] || row['Date'].trim() : '';
         return row['QC'] &&
-          (!start || date >= start) &&
-          (!end || date <= end) &&
+          (!start || rawDate >= start) &&
+          (!end || rawDate <= end) &&
           (!user || row['QC'] === user) &&
           (!ent || row['Enterprise'] === ent);
       });
@@ -150,6 +151,7 @@
       html += '</table>';
       document.getElementById('table-container').innerHTML = html;
     }
+
     function submitFormRow(i) {
       const row = filteredData[i];
       const spinId = row['Spin ID'] || '';
