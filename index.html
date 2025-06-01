@@ -138,9 +138,9 @@
 
       data.forEach((row, i) => {
         html += `<tr>
-          <td>${row['Spin_ID'] || ''}</td>
-          <td>${row['SKU_ID'] || ''}</td>
-          <td>${row['Issues'] || ''}</td>
+          <td>${row['Spin ID'] || ''}</td>
+          <td>${row['SKU ID'] || ''}</td>
+          <td>${row['Issue'] || ''}</td>
           <td>${row['Enterprise'] || ''}</td>
           <td>${row['User'] || ''}</td>
           <td><input type="text" id="comment_${i}" /></td>
@@ -154,11 +154,11 @@
 
     function submitFormRow(i) {
       const row = filteredData[i];
-      const spinId = row['Spin_ID'] || '';
-      const skuId = row['SKU_ID'] || '';
+      const spinId = row['Spin ID'] || '';
+      const skuId = row['SKU ID'] || '';
       const enterprise = row['Enterprise'] || '';
       const qc = row['User'] || '';
-      const issue = row['Issues'] || '';
+      const issue = row['Issue'] || '';
       const comment = document.getElementById(`comment_${i}`).value;
 
       const form = document.createElement("form");
