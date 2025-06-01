@@ -64,7 +64,7 @@
   <div class="filters">
     <label>Start Date: <input type="date" id="startDate"></label>
     <label>End Date: <input type="date" id="endDate"></label>
-    <label>User:
+    <label>QC:
       <select id="qcFilter"><option value="">All</option></select>
     </label>
     <label>Enterprise:
@@ -101,7 +101,7 @@
     function populateDropdowns() {
       const qcSet = new Set(), entSet = new Set();
       globalData.forEach(row => {
-        if (row['User']) qcSet.add(row['User']);
+        if (row['QC']) qcSet.add(row['QC']);
         if (row['Enterprise']) entSet.add(row['Enterprise']);
       });
       document.getElementById('qcFilter').innerHTML = '<option value="">All</option>' + [...qcSet].map(v => `<option>${v}</option>`).join('');
@@ -116,10 +116,10 @@
 
       filteredData = globalData.filter(row => {
         const date = row['Date'] ? new Date(row['Date']).toISOString().split('T')[0] : null;
-        return row['User'] &&
+        return row['QC'] &&
           (!start || date >= start) &&
           (!end || date <= end) &&
-          (!user || row['User'] === user) &&
+          (!user || row['QC'] === user) &&
           (!ent || row['Enterprise'] === ent);
       });
 
@@ -133,7 +133,7 @@
       }
 
       let html = `<table id="qc-table"><tr>
-        <th>Spin ID</th><th>SKU ID</th><th>Issue</th><th>Enterprise</th><th>User</th>
+        <th>Spin ID</th><th>SKU ID</th><th>Issue</th><th>Enterprise</th><th>QC</th>
         <th>Comment</th><th>Submit</th></tr>`;
 
       data.forEach((row, i) => {
@@ -142,7 +142,7 @@
           <td>${row['SKU ID'] || ''}</td>
           <td>${row['Issue'] || ''}</td>
           <td>${row['Enterprise'] || ''}</td>
-          <td>${row['User'] || ''}</td>
+          <td>${row['QC'] || ''}</td>
           <td><input type="text" id="comment_${i}" /></td>
           <td><button onclick="submitFormRow(${i})" id="btn_${i}">Submit</button></td>
         </tr>`;
@@ -157,7 +157,7 @@
       const spinId = row['Spin ID'] || '';
       const skuId = row['SKU ID'] || '';
       const enterprise = row['Enterprise'] || '';
-      const qc = row['User'] || '';
+      const qc = row['QC'] || '';
       const issue = row['Issue'] || '';
       const comment = document.getElementById(`comment_${i}`).value;
 
