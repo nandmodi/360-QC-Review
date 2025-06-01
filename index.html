@@ -138,8 +138,8 @@
 
       data.forEach((row, i) => {
         html += `<tr>
-          <td>${row['Spin ID'] || ''}</td>
-          <td>${row['SKU ID'] || ''}</td>
+          <td>${row['Spin_ID'] || ''}</td>
+          <td>${row['SKU_ID'] || ''}</td>
           <td>${row['Issue'] || ''}</td>
           <td>${row['Enterprise'] || ''}</td>
           <td>${row['QC'] || ''}</td>
@@ -154,8 +154,8 @@
 
     function submitFormRow(i) {
       const row = filteredData[i];
-      const spinId = row['Spin ID'] || '';
-      const skuId = row['SKU ID'] || '';
+      const spinId = row['Spin_ID'] || '';
+      const skuId = row['SKU_ID'] || '';
       const enterprise = row['Enterprise'] || '';
       const qc = row['QC'] || '';
       const issue = row['Issue'] || '';
