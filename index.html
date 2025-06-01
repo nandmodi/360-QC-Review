@@ -11,7 +11,10 @@
       padding: 30px;
       background: #f9f9f9;
     }
-    h2 { margin-bottom: 20px; color: #333; }
+    h2 {
+      margin-bottom: 20px;
+      color: #333;
+    }
     .filters {
       margin-bottom: 20px;
       display: flex;
@@ -37,7 +40,9 @@
       border: 1px solid #ccc;
       text-align: left;
     }
-    th { background-color: #f0f0f0; }
+    th {
+      background-color: #f0f0f0;
+    }
     button {
       padding: 6px 14px;
       background: #007bff;
@@ -69,100 +74,130 @@
   </div>
 
   <div id="table-container">Loading...</div>
+<script>
+  const CSV_URL = 'https://docs.google.com/spreadsheets/d/1JlcXL8X1VRxlRVGyTuLElsm9IgOiteT6amOEXrEx-jY/gviz/tq?tqx=out:csv&sheet=Data';
+  const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeQH6R9-rYr1Kh2rwUBKu7uGvJAkRrvx8fnxF6jfkac7sNL2A/formResponse';
 
-  <script>
-    const CSV_URL = 'https://docs.google.com/spreadsheets/d/1JlcXL8X1VRxlRVGyTuLElsm9IgOiteT6amOEXrEx-jY/gviz/tq?tqx=out:csv&sheet=Data';
-    const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeQH6R9-rYr1Kh2rwUBKu7uGvJAkRrvx8fnxF6jfkac7sNL2A/formResponse';
+  let globalData = [];
+  let filteredData = [];
 
-    let globalData = [];
-    let filteredData = [];
-
-    function loadAndFilterCSV() {
-      fetch(CSV_URL)
-        .then(res => res.text())
-        .then(csv => {
-          Papa.parse(csv, {
-            header: true,
-            skipEmptyLines: true,
-            transformHeader: header => header.trim(),
-            complete: function(results) {
-              globalData = results.data;
-              populateDropdowns();
-              applyFilters();
-            }
-          });
+  function loadAndFilterCSV() {
+    fetch(CSV_URL)
+      .then(res => res.text())
+      .then(csv => {
+        Papa.parse(csv, {
+          header: true,
+          skipEmptyLines: true,
+          transformHeader: header => header.trim(),
+          complete: function(results) {
+            globalData = results.data;
+            populateDropdowns();
+            applyFilters();
+          }
         });
-    }
-
-    function populateDropdowns() {
-      const qcSet = new Set(), entSet = new Set();
-      globalData.forEach(row => {
-        if (row['User']) qcSet.add(row['User']);
-        if (row['Enterprise']) entSet.add(row['Enterprise']);
       });
-      document.getElementById('qcFilter').innerHTML = '<option value="">All</option>' + [...qcSet].map(v => `<option>${v}</option>`).join('');
-      document.getElementById('enterpriseFilter').innerHTML = '<option value="">All</option>' + [...entSet].map(v => `<option>${v}</option>`).join('');
+  }
+
+  function populateDropdowns() {
+    const qcSet = new Set(), entSet = new Set();
+    globalData.forEach(row => {
+      if (row['User']) qcSet.add(row['User']);
+      if (row['Enterprise']) entSet.add(row['Enterprise']);
+    });
+    document.getElementById('qcFilter').innerHTML = '<option value="">All</option>' + [...qcSet].map(v => `<option>${v}</option>`).join('');
+    document.getElementById('enterpriseFilter').innerHTML = '<option value="">All</option>' + [...entSet].map(v => `<option>${v}</option>`).join('');
+  }
+
+  function applyFilters() {
+    const start = document.getElementById('startDate').value;
+    const end = document.getElementById('endDate').value;
+    const user = document.getElementById('qcFilter').value;
+    const ent = document.getElementById('enterpriseFilter').value;
+
+    filteredData = globalData.filter(row => {
+      const rawDate = row['Date'] ? row['Date'].split('T')[0] || row['Date'].trim() : '';
+      return row['User'] &&
+        (!start || rawDate >= start) &&
+        (!end || rawDate <= end) &&
+        (!user || row['User'] === user) &&
+        (!ent || row['Enterprise'] === ent);
+    });
+
+    renderTable(filteredData);
+  }
+  function renderTable(data) {
+    if (!data.length) {
+      document.getElementById('table-container').innerHTML = 'No matching data.';
+      return;
     }
 
-    function applyFilters() {
-      const start = document.getElementById('startDate').value;
-      const end = document.getElementById('endDate').value;
-      const user = document.getElementById('qcFilter').value;
-      const ent = document.getElementById('enterpriseFilter').value;
+    let html = `<table id="qc-table"><tr>
+      <th>Spin_ID</th><th>SKU_ID</th><th>Issues</th><th>Enterprise</th><th>User</th><th>Spin URL</th>
+      <th>Comment</th><th>Submit</th></tr>`;
 
-      filteredData = globalData.filter(row => {
-        const rawDate = row['Date'] ? row['Date'].split('T')[0] || row['Date'].trim() : '';
-        return row['User'] &&
-          (!start || rawDate >= start) &&
-          (!end || rawDate <= end) &&
-          (!user || row['User'] === user) &&
-          (!ent || row['Enterprise'] === ent);
-      });
+    data.forEach((row, i) => {
+      const spinId = row['Spin_ID'] || '';
+      const skuId = row['SKU_ID'] || '';
+      const spinURL = row['spin_url'] || '';
+      html += `<tr>
+        <td>${spinId}</td>
+        <td>${skuId}</td>
+        <td>${row['Issues'] || ''}</td>
+        <td>${row['Enterprise'] || ''}</td>
+        <td>${row['User'] || ''}</td>
+        <td><a href="${spinURL}" target="_blank">Link</a></td>
+        <td><input type="text" id="comment_${i}" /></td>
+        <td><button onclick="submitFormRow(${i})" id="btn_${i}">Submit</button></td>
+      </tr>`;
+    });
 
-      renderTable(filteredData);
-    }
+    html += '</table>';
+    document.getElementById('table-container').innerHTML = html;
+  }
 
-    function renderTable(data) {
-      if (!data.length) {
-        document.getElementById('table-container').innerHTML = 'No matching data.';
-        return;
-      }
+  function submitFormRow(i) {
+    const row = filteredData[i];
+    const spinId = row['Spin_ID'] || '';
+    const skuId = row['SKU_ID'] || '';
+    const enterprise = row['Enterprise'] || '';
+    const qc = row['User'] || '';
+    const issue = row['Issues'] || '';
+    const comment = document.getElementById(`comment_${i}`).value;
 
-      let html = `<table id="qc-table"><tr>
-        <th>Spin ID</th><th>SKU ID</th><th>Issues</th><th>Enterprise</th><th>QC</th><th>Spin URL</th>
-        <th>Comment</th><th>Submit</th></tr>`;
+    const form = document.createElement("form");
+    form.action = FORM_URL;
+    form.method = "POST";
+    form.target = "hidden_iframe";
+    form.style.display = "none";
 
-      data.forEach((row, i) => {
-        const spinId = row['Spin_ID'] || '';
-        const skuId = row['SKU_ID'] || '';
-        const spinURL = row['spin_url'] || '';
-        html += `<tr>
-          <td>${spinId}</td>
-          <td>${skuId}</td>
-          <td>${row['Issues'] || ''}</td>
-          <td>${row['Enterprise'] || ''}</td>
-          <td>${row['User'] || ''}</td>
-          <td><a href="${spinURL}" target="_blank">Link</a></td>
-          <td><input type="text" id="comment_${i}" /></td>
-          <td><button onclick="submitFormRow(${i})" id="btn_${i}">Submit</button></td>
-        </tr>`;
-      });
+    form.innerHTML = `
+      <input name="entry.1125049159" value="${spinId}">
+      <input name="entry.703277665" value="${skuId}">
+      <input name="entry.1815472287" value="${enterprise}">
+      <input name="entry.582537694" value="${qc}">
+      <input name="entry.575622617" value="${issue}">
+      <input name="entry.1234567890" value="${comment}">
+    `;
 
-      html += '</table>';
-      document.getElementById('table-container').innerHTML = html;
-    }
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
 
-    window.onload = () => {
-      const today = new Date().toISOString().split('T')[0];
-      const lastWeek = new Date();
-      lastWeek.setDate(lastWeek.getDate() - 7);
-      document.getElementById('endDate').value = today;
-      document.getElementById('startDate').value = lastWeek.toISOString().split('T')[0];
-      loadAndFilterCSV();
-    };
-  </script>
+    const btn = document.getElementById(`btn_${i}`);
+    btn.disabled = true;
+    btn.innerText = "Submitted";
+  }
 
-  <iframe name="hidden_iframe" style="display:none;"></iframe>
+  window.onload = () => {
+    const today = new Date().toISOString().split('T')[0];
+    const lastWeek = new Date(); lastWeek.setDate(lastWeek.getDate() - 7);
+    document.getElementById('endDate').value = today;
+    document.getElementById('startDate').value = lastWeek.toISOString().split('T')[0];
+    loadAndFilterCSV();
+  };
+</script>
+
+<iframe name="hidden_iframe" style="display:none;"></iframe>
 
 </body>
 </html>
