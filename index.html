@@ -129,12 +129,12 @@
       }
 
       let html = `<table id="qc-table"><tr>
-        <th>Spin_ID</th><th>SKU_ID</th><th>Issue</th><th>Enterprise</th><th>QC</th><th>Spin URL</th>
+        <th>Spin ID</th><th>SKU ID</th><th>Issue</th><th>Enterprise</th><th>QC</th><th>Spin URL</th>
         <th>Comment</th><th>Submit</th></tr>`;
 
       data.forEach((row, i) => {
-        const spinId = row['Spin_ID'] || '';
-        const skuId = row['SKU_ID'] || '';
+        const spinId = row['Spin ID'] || '';
+        const skuId = row['SKU ID'] || '';
         const spinURL = skuId ? `https://assets.spyne.ai/360?sku_id=${encodeURIComponent(skuId)}` : '';
         html += `<tr>
           <td>${spinId}</td>
@@ -154,8 +154,8 @@
 
     function submitFormRow(i) {
       const row = filteredData[i];
-      const spinId = row['Spin_ID'] || '';
-      const skuId = row['SKU_ID'] || '';
+      const spinId = row['Spin ID'] || '';
+      const skuId = row['SKU ID'] || '';
       const enterprise = row['Enterprise'] || '';
       const qc = row['QC'] || '';
       const issue = row['Issue'] || '';
@@ -172,6 +172,7 @@
         <input name="entry.1815472287" value="${enterprise}">
         <input name="entry.582537694" value="${qc}">
         <input name="entry.575622617" value="${issue}">
+        <input name="entry.1234567890" value="${comment}">
       `;
 
       document.body.appendChild(form);
