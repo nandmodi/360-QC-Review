@@ -267,10 +267,6 @@
           globalData = results.data;
           populateDropdowns();
           applyFilters();
-        },
-        error: err => {
-          document.getElementById('table-container').innerText = 'Error loading data.';
-          console.error(err);
         }
       });
     }).catch(err => {
@@ -332,8 +328,10 @@
     const row = filteredData[i];
     document.getElementById('modalIframe').src = row['spin_url'] || '';
     document.getElementById('modalIssues').textContent = row['Issues'] || 'No issues reported.';
-    document.getElementById('modalComment').value = '';
+    const commentBox = document.getElementById('modalComment');
+    commentBox.value = '';
     document.getElementById('modal').style.display = 'flex';
+    setTimeout(() => commentBox.focus(), 100);
   }
 
   function closeModal() {
@@ -348,6 +346,13 @@
     const comment = document.getElementById('modalComment').value.trim() || 'Done';
     submitFormRow(currentModalIndex, comment);
   };
+
+  document.getElementById('modalComment').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      document.getElementById('modalSubmitBtn').click();
+    }
+  });
 
   function submitFormRow(i, commentValue) {
     const row = filteredData[i];
