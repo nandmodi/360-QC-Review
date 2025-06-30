@@ -1,211 +1,207 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>360 QC Review Dashboard</title>
-<link rel="icon" href="https://spyne-prod-ai.s3.us-east-1.amazonaws.com/ai-dataset/2025/favicon.ico" type="image/x-icon" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-<style>
-  body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #f4f7fa;
-    color: #333;
-    padding: 40px 20px;
-    margin: 0;
-  }
-  h2 {
-    font-weight: 700;
-    color: #222;
-    margin-bottom: 30px;
-    text-align: center;
-    letter-spacing: 1.2px;
-  }
-  .filters {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;  /* Align items to start */
-    align-items: flex-end;        /* Align inputs and button to baseline */
-    gap: 20px 30px;
-    margin-bottom: 30px;
-  }
-  .filters > div {
-    display: flex;
-    align-items: center;
-  }
-  .filters label {
-    display: flex;
-    flex-direction: column;
-    font-size: 14px;
-    color: #555;
-    min-width: 140px;
-  }
-  .filters label input,
-  .filters label select {
-    padding: 10px 14px;
-    font-size: 15px;
-    border: 1.8px solid #ccc;
-    border-radius: 6px;
-    transition: border-color 0.3s ease;
-    outline-offset: 2px;
-    margin-bottom: 4px; /* Vertical spacing for better alignment */
-  }
-  .filters input[type="date"]:focus,
-  .filters select:focus {
-    border-color: #007bff;
-    outline: none;
-    box-shadow: 0 0 6px rgba(0, 123, 255, 0.4);
-  }
-  .filters > div button {
-    margin-top: 22px; /* Align button vertically with inputs */
-    background-color: #007bff;
-    border: none;
-    color: #fff;
-    font-weight: 600;
-    padding: 12px 25px;
-    font-size: 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.25);
-  }
-  .filters > div button:hover:not(:disabled) {
-    background-color: #0056b3;
-  }
-  .filters > div button:disabled {
-    background-color: #a3a3a3;
-    cursor: not-allowed;
-    box-shadow: none;
-  }
-  #table-container {
-    overflow-x: auto;
-    box-shadow: 0 4px 20px rgb(0 0 0 / 0.05);
-    border-radius: 10px;
-    background: #fff;
-    padding: 20px;
-  }
-  table {
-    border-collapse: separate;
-    border-spacing: 0 8px;
-    width: 100%;
-    min-width: 900px;
-    font-size: 14.5px;
-    color: #444;
-  }
-  th, td {
-    padding: 14px 18px;
-    text-align: left;
-    vertical-align: middle;
-    background: #fff;
-    border: none;
-  }
-  th {
-    background-color: #e9f0ff;
-    font-weight: 600;
-    color: #007bff;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-  tr:hover td {
-    background-color: #f5faff;
-  }
-  a.link-button {
-    color: #007bff;
-    cursor: pointer;
-    font-weight: 600;
-    text-decoration: underline;
-  }
-  a.link-button:visited {
-    color: #0056b3;
-  }
+  <meta charset="UTF-8" />
+  <title>360 QC Review Dashboard</title>
+  <link rel="icon" href="https://spyne-prod-ai.s3.us-east-1.amazonaws.com/ai-dataset/2025/favicon.ico" type="image/x-icon" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f7fa;
+      color: #333;
+      padding: 40px 20px;
+      margin: 0;
+    }
+    h2 {
+      font-weight: 700;
+      color: #222;
+      margin-bottom: 30px;
+      text-align: center;
+      letter-spacing: 1.2px;
+    }
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      align-items: flex-end;
+      gap: 20px 30px;
+      margin-bottom: 30px;
+    }
+    .filters > div {
+      display: flex;
+      align-items: center;
+    }
+    .filters label {
+      display: flex;
+      flex-direction: column;
+      font-size: 14px;
+      color: #555;
+      min-width: 140px;
+    }
+    .filters label input,
+    .filters label select {
+      padding: 10px 14px;
+      font-size: 15px;
+      border: 1.8px solid #ccc;
+      border-radius: 6px;
+      transition: border-color 0.3s ease;
+      outline-offset: 2px;
+      margin-bottom: 4px;
+    }
+    .filters input[type="date"]:focus,
+    .filters select:focus {
+      border-color: #007bff;
+      outline: none;
+      box-shadow: 0 0 6px rgba(0, 123, 255, 0.4);
+    }
+    .filters > div button {
+      margin-top: 22px;
+      background-color: #007bff;
+      border: none;
+      color: #fff;
+      font-weight: 600;
+      padding: 12px 25px;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0, 123, 255, 0.25);
+    }
+    .filters > div button:hover:not(:disabled) {
+      background-color: #0056b3;
+    }
+    .filters > div button:disabled {
+      background-color: #a3a3a3;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    #table-container {
+      overflow-x: auto;
+      box-shadow: 0 4px 20px rgb(0 0 0 / 0.05);
+      border-radius: 10px;
+      background: #fff;
+      padding: 20px;
+    }
+    table {
+      border-collapse: separate;
+      border-spacing: 0 8px;
+      width: 100%;
+      min-width: 900px;
+      font-size: 14.5px;
+      color: #444;
+    }
+    th, td {
+      padding: 14px 18px;
+      text-align: left;
+      vertical-align: middle;
+      background: #fff;
+      border: none;
+    }
+    th {
+      background-color: #e9f0ff;
+      font-weight: 600;
+      color: #007bff;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    tr:hover td {
+      background-color: #f5faff;
+    }
+    a.link-button {
+      color: #007bff;
+      cursor: pointer;
+      font-weight: 600;
+      text-decoration: underline;
+    }
+    a.link-button:visited {
+      color: #0056b3;
+    }
 
-  /* FULLSCREEN MODAL */
-  #modal {
-    display: none; /* Hidden by default */
-    position: fixed;
-    z-index: 10000;
-    top: 0; left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0,0,0,0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-  }
-  #modalContent {
-    background: #fff;
-    width: 100vw;
-    height: 100vh;
-    max-width: none;
-    border-radius: 0;
-    box-shadow: none;
-    display: flex;
-    flex-direction: column;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 10001;
-  }
-  #modalHeader {
-    padding: 10px 20px;
-    font-weight: 700;
-    font-size: 18px;
-    color: #007bff;
-    border-bottom: 1px solid #ccc;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #f9fbff;
-  }
-  #closeModal {
-    cursor: pointer;
-    font-size: 28px;
-    font-weight: 700;
-    color: #007bff;
-    border: none;
-    background: none;
-  }
-  #modalIssues {
-    padding: 15px 20px;
-    background: #fff9e6;
-    color: #8a6d00;
-    font-size: 16px;
-    font-weight: 600;
-    border-bottom: 1px solid #f5e1a4;
-    max-height: 100px;
-    overflow-y: auto;
-    white-space: pre-wrap;
-  }
-  #modalIframe {
-    flex: 1;
-    border: none;
-    width: 100%;
-    height: auto;
-  }
-  #modalFooter {
-    padding: 12px 20px;
-    border-top: 1px solid #ccc;
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    background: #f9fbff;
-  }
-  #modalFooter textarea {
-    flex: 1;
-    resize: vertical;
-    min-height: 60px;
-    font-size: 16px;
-    padding: 12px 15px;
-    border-radius: 6px;
-    border: 1.8px solid #ccc;
-    transition: border-color 0.3s ease;
-  }
-  #modalFooter textarea:focus {
-    border-color: #007bff;
-    outline: none;
-    box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
-  }
-</style>
+    #modal {
+      display: none;
+      position: fixed;
+      z-index: 10000;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.6);
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    #modalContent {
+      background: #fff;
+      width: 100vw;
+      height: 100vh;
+      border-radius: 0;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 10001;
+    }
+    #modalHeader {
+      padding: 10px 20px;
+      font-weight: 700;
+      font-size: 18px;
+      color: #007bff;
+      border-bottom: 1px solid #ccc;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f9fbff;
+    }
+    #closeModal {
+      cursor: pointer;
+      font-size: 28px;
+      font-weight: 700;
+      color: #007bff;
+      border: none;
+      background: none;
+    }
+    #modalIssues {
+      padding: 15px 20px;
+      background: #fff9e6;
+      color: #8a6d00;
+      font-size: 16px;
+      font-weight: 600;
+      border-bottom: 1px solid #f5e1a4;
+      max-height: 100px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+    #modalIframe {
+      flex: 1;
+      border: none;
+      width: 100%;
+      height: auto;
+    }
+    #modalFooter {
+      padding: 12px 20px;
+      border-top: 1px solid #ccc;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      background: #f9fbff;
+    }
+    #modalFooter textarea {
+      flex: 1;
+      resize: vertical;
+      min-height: 60px;
+      font-size: 16px;
+      padding: 12px 15px;
+      border-radius: 6px;
+      border: 1.8px solid #ccc;
+      transition: border-color 0.3s ease;
+    }
+    #modalFooter textarea:focus {
+      border-color: #007bff;
+      outline: none;
+      box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+    }
+  </style>
 </head>
 <body>
 
@@ -214,12 +210,8 @@
 <div class="filters">
   <label>Start Date: <input type="date" id="startDate" /></label>
   <label>End Date: <input type="date" id="endDate" /></label>
-  <label>User:
-    <select id="userFilter"><option value="">All</option></select>
-  </label>
-  <label>Enterprise:
-    <select id="enterpriseFilter"><option value="">All</option></select>
-  </label>
+  <label>User: <select id="userFilter"><option value="">All</option></select></label>
+  <label>Enterprise: <select id="enterpriseFilter"><option value="">All</option></select></label>
   <label>Issue:
     <select id="issueFilter">
       <option value="">All</option>
@@ -229,14 +221,11 @@
       <option value="low">Low</option>
     </select>
   </label>
-  <div>
-    <button onclick="applyFilters()">Filter</button>
-  </div>
+  <div><button onclick="applyFilters()">Filter</button></div>
 </div>
 
 <div id="table-container">Loading...</div>
 
-<!-- Fullscreen Modal -->
 <div id="modal">
   <div id="modalContent">
     <div id="modalHeader">
@@ -252,59 +241,54 @@
   </div>
 </div>
 
+<iframe name="hidden_iframe" style="display:none;"></iframe>
+
 <script>
   const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vThoeXNovzUYQaHoFqHYY8p4hxrGTJWUPF8dQs0cinxvypfUVwAzFu74l06jhqXm0x611kRke13fa2t/pub?gid=0&single=true&output=csv';
   const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeQH6R9-rYr1Kh2rwUBKu7uGvJAkRrvx8fnxF6jfkac7sNL2A/formResponse';
 
-  let globalData = [];
-  let filteredData = [];
-  let currentModalIndex = null;
+  let globalData = [], filteredData = [], currentModalIndex = null;
 
   function escapeHtml(text) {
-    if (!text) return '';
-    return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+    return text ? text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+                  .replace(/"/g, "&quot;").replace(/'/g, "&#39;") : '';
   }
 
   function escapeHtmlAttr(text) {
-    if (!text) return '';
-    return text.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/'/g, "&#39;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    return text ? text.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/'/g, "&#39;")
+                  .replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
   }
 
   function loadAndFilterCSV() {
-    fetch(CSV_URL)
-      .then(res => res.text())
-      .then(csv => {
-        Papa.parse(csv, {
-          header: true,
-          skipEmptyLines: true,
-          transformHeader: h => h.trim(),
-          complete: results => {
-            globalData = results.data;
-            populateDropdowns();
-            applyFilters();
-          },
-          error: err => {
-            document.getElementById('table-container').innerText = 'Error loading data.';
-            console.error('CSV load error:', err);
-          }
-        });
-      })
-      .catch(err => {
-        document.getElementById('table-container').innerText = 'Error fetching CSV.';
-        console.error('Fetch error:', err);
+    fetch(CSV_URL).then(res => res.text()).then(csv => {
+      Papa.parse(csv, {
+        header: true, skipEmptyLines: true, transformHeader: h => h.trim(),
+        complete: results => {
+          globalData = results.data;
+          populateDropdowns();
+          applyFilters();
+        },
+        error: err => {
+          document.getElementById('table-container').innerText = 'Error loading data.';
+          console.error(err);
+        }
       });
+    }).catch(err => {
+      document.getElementById('table-container').innerText = 'Error fetching CSV.';
+      console.error(err);
+    });
   }
 
   function populateDropdowns() {
-    const userSet = new Set(), entSet = new Set();
-    globalData.forEach(row => {
-      if (row['User']) userSet.add(row['User']);
-      if (row['Enterprise']) entSet.add(row['Enterprise']);
+    const users = new Set(), enterprises = new Set();
+    globalData.forEach(r => {
+      if (r['User']) users.add(r['User']);
+      if (r['Enterprise']) enterprises.add(r['Enterprise']);
     });
     document.getElementById('userFilter').innerHTML =
-      '<option value="">All</option>' + [...userSet].map(v => `<option value="${v.trim()}">${escapeHtml(v)}</option>`).join('');
+      '<option value="">All</option>' + [...users].map(u => `<option>${escapeHtml(u)}</option>`).join('');
     document.getElementById('enterpriseFilter').innerHTML =
-      '<option value="">All</option>' + [...entSet].map(v => `<option value="${v.trim()}">${escapeHtml(v)}</option>`).join('');
+      '<option value="">All</option>' + [...enterprises].map(e => `<option>${escapeHtml(e)}</option>`).join('');
   }
 
   function applyFilters() {
@@ -315,76 +299,39 @@
     const issueFilter = document.getElementById('issueFilter').value.toLowerCase();
 
     filteredData = globalData.filter(row => {
-      if (!row['User']) return false;
-      const rawDate = row['Date'] ? row['Date'].split('T')[0].trim() : '';
-      if (!rawDate) return false;
+      const rawDate = row['Date']?.split('T')[0].trim();
+      if (!row['User'] || !rawDate) return false;
       if (start && rawDate < start) return false;
       if (end && rawDate > end) return false;
-      if (user && (!row['User'] || row['User'].toLowerCase() !== user)) return false;
-      if (ent && (!row['Enterprise'] || row['Enterprise'].toLowerCase() !== ent)) return false;
-
+      if (user && row['User'].toLowerCase() !== user) return false;
+      if (ent && row['Enterprise'].toLowerCase() !== ent) return false;
       const issues = (row['Issues'] || '').toLowerCase().trim();
-
-      if (issueFilter === 'nullblank') {
-        if (issues.length > 0) return false;
-      } else if (issueFilter && issueFilter !== '') {
-        if (!issues.includes(issueFilter)) return false;
-      }
-
+      if (issueFilter === 'nullblank' && issues.length > 0) return false;
+      if (issueFilter && issueFilter !== 'nullblank' && !issues.includes(issueFilter)) return false;
       return true;
     });
-
     renderTable(filteredData);
   }
 
   function renderTable(data) {
-    if (!data.length) {
-      document.getElementById('table-container').innerHTML = 'No matching data.';
-      return;
-    }
-
-    let html = `<table id="qc-table"><tr>
-      <th>Date</th><th>Spin_ID</th><th>SKU_ID</th><th>Issues</th><th>Enterprise</th><th>User</th><th>Spin URL</th>
-    </tr>`;
-
-    data.forEach((row, i) => {
-      const dateVal = escapeHtml(row['Date'] ? row['Date'].split('T')[0].trim() : '');
-      const spinId = escapeHtml(row['Spin_ID'] || '');
-      const skuId = escapeHtml(row['SKU_ID'] || '');
-      const enterprise = escapeHtml(row['Enterprise'] || '');
-      const user = escapeHtml(row['User'] || '');
-      const spinURL = row['spin_url'] || '';
-      const issuesHtml = escapeHtml(row['Issues'] || '').replace(/\n/g, '<br>');
-
-      const submitted = row._submitted || false;
+    if (!data.length) return document.getElementById('table-container').innerText = 'No matching data.';
+    let html = `<table><tr><th>Date</th><th>Spin_ID</th><th>SKU_ID</th><th>Issues</th><th>Enterprise</th><th>User</th><th>Spin URL</th></tr>`;
+    data.forEach((r, i) => {
+      const submitted = r._submitted || false;
       const linkClass = submitted ? 'link-button disabled' : 'link-button';
-      const linkStyle = submitted ? 'pointer-events:none; color:gray; text-decoration:none;' : '';
-
-      html += `<tr>
-        <td>${dateVal}</td>
-        <td>${spinId}</td>
-        <td>${skuId}</td>
-        <td>${issuesHtml}</td>
-        <td>${enterprise}</td>
-        <td>${user}</td>
-        <td><a class="${linkClass}" style="${linkStyle}" onclick="openModal(${i})" title="View Spin" href="javascript:void(0)">View Spin</a></td>
-      </tr>`;
+      const style = submitted ? 'pointer-events:none;color:gray;text-decoration:none;' : '';
+      html += `<tr><td>${escapeHtml(r['Date']?.split('T')[0])}</td><td>${escapeHtml(r['Spin_ID'])}</td><td>${escapeHtml(r['SKU_ID'])}</td>
+               <td>${escapeHtml(r['Issues'] || '').replace(/\n/g, '<br>')}</td><td>${escapeHtml(r['Enterprise'])}</td><td>${escapeHtml(r['User'])}</td>
+               <td><a class="${linkClass}" style="${style}" onclick="openModal(${i})" href="javascript:void(0)">View Spin</a></td></tr>`;
     });
-
-    html += '</table>';
-    document.getElementById('table-container').innerHTML = html;
+    document.getElementById('table-container').innerHTML = html + '</table>';
   }
 
   function openModal(i) {
     currentModalIndex = i;
     const row = filteredData[i];
-    const url = row['spin_url'];
-    if (!url) return alert('Spin URL not available');
-    document.getElementById('modalIframe').src = url;
-
-    const issuesText = row['Issues'] || 'No issues reported.';
-    document.getElementById('modalIssues').textContent = issuesText;
-
+    document.getElementById('modalIframe').src = row['spin_url'] || '';
+    document.getElementById('modalIssues').textContent = row['Issues'] || 'No issues reported.';
     document.getElementById('modalComment').value = '';
     document.getElementById('modal').style.display = 'flex';
   }
@@ -394,60 +341,41 @@
     document.getElementById('modalIframe').src = '';
   }
 
-  document.getElementById('closeModal').addEventListener('click', closeModal);
+  document.getElementById('closeModal').onclick = closeModal;
 
-  document.getElementById('modalSubmitBtn').addEventListener('click', () => {
+  document.getElementById('modalSubmitBtn').onclick = () => {
     if (currentModalIndex === null) return;
-    const comment = document.getElementById('modalComment').value.trim();
-    if (!comment) {
-      alert('Please enter a comment before submitting.');
-      return;
-    }
+    const comment = document.getElementById('modalComment').value.trim() || 'Done';
     submitFormRow(currentModalIndex, comment);
-  });
+  };
 
   function submitFormRow(i, commentValue) {
-    try {
-      const row = filteredData[i];
-      const spinId = escapeHtmlAttr(row['Spin_ID'] || '');
-      const skuId = escapeHtmlAttr(row['SKU_ID'] || '');
-      const enterprise = escapeHtmlAttr(row['Enterprise'] || '');
-      const user = escapeHtmlAttr(row['User'] || '');
-      const issue = escapeHtmlAttr(row['Issues'] || '');
-      const comment = escapeHtmlAttr(commentValue || '');
-      const spinUrl = escapeHtmlAttr(row['spin_url'] || '');
-
-      const form = document.createElement("form");
-      form.action = FORM_URL;
-      form.method = "POST";
-      form.target = "hidden_iframe";
-      form.style.display = "none";
-
-      form.innerHTML = `
-        <input name="entry.1125049159" value="${spinId}">
-        <input name="entry.703277665" value="${skuId}">
-        <input name="entry.1815472287" value="${enterprise}">
-        <input name="entry.582537694" value="${user}">
-        <input name="entry.575622617" value="${issue}">
-        <input name="entry.1751143375" value="${comment}">
-        <input name="entry.1372347436" value="${spinUrl}">
-      `;
-
-      const iframe = document.getElementsByName('hidden_iframe')[0];
-      if (iframe) {
-        iframe.onload = function () {
-          filteredData[i]._submitted = true;
-          renderTable(filteredData);
-          closeModal();
-        };
-      }
-
-      document.body.appendChild(form);
-      form.submit();
-      document.body.removeChild(form);
-    } catch (error) {
-      console.error('Error submitting form row', i, error);
-    }
+    const row = filteredData[i];
+    const form = document.createElement("form");
+    form.action = FORM_URL;
+    form.method = "POST";
+    form.target = "hidden_iframe";
+    form.style.display = "none";
+    form.innerHTML = `
+      <input name="entry.1125049159" value="${escapeHtmlAttr(row['Spin_ID'])}">
+      <input name="entry.703277665" value="${escapeHtmlAttr(row['SKU_ID'])}">
+      <input name="entry.1815472287" value="${escapeHtmlAttr(row['Enterprise'])}">
+      <input name="entry.582537694" value="${escapeHtmlAttr(row['User'])}">
+      <input name="entry.575622617" value="${escapeHtmlAttr(row['Issues'])}">
+      <input name="entry.1751143375" value="${escapeHtmlAttr(commentValue)}">
+      <input name="entry.1372347436" value="${escapeHtmlAttr(row['spin_url'])}">
+    `;
+    const iframe = document.getElementsByName('hidden_iframe')[0];
+    iframe.onload = () => {
+      filteredData[i]._submitted = true;
+      renderTable(filteredData);
+      closeModal();
+      const nextIndex = filteredData.findIndex((r, idx) => idx > i && !r._submitted);
+      if (nextIndex !== -1) setTimeout(() => openModal(nextIndex), 300);
+    };
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
   }
 
   window.onload = () => {
@@ -459,8 +387,6 @@
     loadAndFilterCSV();
   };
 </script>
-
-<iframe name="hidden_iframe" style="display:none;"></iframe>
 
 </body>
 </html>
