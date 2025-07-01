@@ -319,7 +319,7 @@
 
   function renderTable(data) {
     if (!data.length) return document.getElementById('table-container').innerText = 'No matching data.';
-    let html = `<table><tr><th>Date</th><th>Spin_ID</th><th>SKU_ID</th><th>Issues</th><th>Validation Failed</th><th>Enterprise</th><th>User</th><th>Spin URL</th></tr>`;
+    let html = `<table><tr><th>Date</th><th>SKU_ID</th><th>Spin_ID</th><th>Issues</th><th>Validation Failed</th><th>Enterprise</th><th>User</th><th>Spin URL</th></tr>`;
     data.forEach((r, i) => {
       const submitted = r._submitted || false;
       const linkClass = submitted ? 'link-button disabled' : 'link-button';
@@ -328,8 +328,8 @@
                       .filter(v => v && v.trim()).join(' | ');
       html += `<tr>
         <td>${escapeHtml(new Date(r['Date']).toISOString().split('T')[0])}</td>
-        <td>${escapeHtml(r['Spin_ID'])}</td>
         <td>${escapeHtml(r['SKU_ID'])}</td>
+        <td>${escapeHtml(r['Spin_ID'])}</td>
         <td>${escapeHtml(r['Issues'] || '').replace(/
 /g, '<br>')}</td>
         <td>${escapeHtml(valFail)}</td>
@@ -339,6 +339,8 @@
       </tr>`;
     });
     document.getElementById('table-container').innerHTML = html + '</table>';
+  }
+  }
   }
 
   function openModal(i) {
