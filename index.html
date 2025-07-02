@@ -6,200 +6,200 @@
   <link rel="icon" href="https://spyne-prod-ai.s3.us-east-1.amazonaws.com/ai-dataset/2025/favicon.ico" type="image/x-icon" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
   <style>
-        body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #f4f7fa;
-      color: #333;
-      padding: 40px 20px;
-      margin: 0;
-    }
-    h2 {
-      font-weight: 700;
-      color: #222;
-      margin-bottom: 30px;
-      text-align: center;
-      letter-spacing: 1.2px;
-    }
-    .filters {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: flex-start;
-      align-items: flex-end;
-      gap: 20px 30px;
-      margin-bottom: 30px;
-    }
-    .filters > div {
-      display: flex;
-      align-items: center;
-    }
-    .filters label {
-      display: flex;
-      flex-direction: column;
-      font-size: 14px;
-      color: #555;
-      min-width: 140px;
-    }
-    .filters label input,
-    .filters label select {
-      padding: 10px 14px;
-      font-size: 15px;
-      border: 1.8px solid #ccc;
-      border-radius: 6px;
-      transition: border-color 0.3s ease;
-      outline-offset: 2px;
-      margin-bottom: 4px;
-    }
-    .filters input[type="date"]:focus,
-    .filters select:focus {
-      border-color: #007bff;
-      outline: none;
-      box-shadow: 0 0 6px rgba(0, 123, 255, 0.4);
-    }
-    .filters > div button {
-      margin-top: 22px;
-      background-color: #007bff;
-      border: none;
-      color: #fff;
-      font-weight: 600;
-      padding: 12px 25px;
-      font-size: 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      box-shadow: 0 4px 12px rgba(0, 123, 255, 0.25);
-    }
-    .filters > div button:hover:not(:disabled) {
-      background-color: #0056b3;
-    }
-    .filters > div button:disabled {
-      background-color: #a3a3a3;
-      cursor: not-allowed;
-      box-shadow: none;
-    }
-    #table-container {
-      overflow-x: auto;
-      box-shadow: 0 4px 20px rgb(0 0 0 / 0.05);
-      border-radius: 10px;
-      background: #fff;
-      padding: 20px;
-    }
-    table {
-      border-collapse: separate;
-      border-spacing: 0 8px;
-      width: 100%;
-      min-width: 900px;
-      font-size: 14.5px;
-      color: #444;
-    }
-    th, td {
-      padding: 14px 18px;
-      text-align: left;
-      vertical-align: middle;
-      background: #fff;
-      border: none;
-    }
-    th {
-      background-color: #e9f0ff;
-      font-weight: 600;
-      color: #007bff;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    tr:hover td {
-      background-color: #f5faff;
-    }
-    a.link-button {
-      color: #007bff;
-      cursor: pointer;
-      font-weight: 600;
-      text-decoration: underline;
-    }
-    a.link-button:visited {
-      color: #0056b3;
-    }
-    #modal {
-      display: none;
-      position: fixed;
-      z-index: 10000;
-      top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0,0,0,0.6);
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
-    #modalContent {
-      background: #fff;
-      width: 100vw;
-      height: 100vh;
-      border-radius: 0;
-      display: flex;
-      flex-direction: column;
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: 10001;
-    }
-    #modalHeader {
-      padding: 10px 20px;
-      font-weight: 700;
-      font-size: 18px;
-      color: #007bff;
-      border-bottom: 1px solid #ccc;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #f9fbff;
-    }
-    #closeModal {
-      cursor: pointer;
-      font-size: 28px;
-      font-weight: 700;
-      color: #007bff;
-      border: none;
-      background: none;
-    }
-    #modalIssues {
-      padding: 15px 20px;
-      background: #fff9e6;
-      color: #8a6d00;
-      font-size: 16px;
-      font-weight: 600;
-      border-bottom: 1px solid #f5e1a4;
-      max-height: 100px;
-      overflow-y: auto;
-      white-space: pre-wrap;
-    }
-    #modalIframe {
-      flex: 1;
-      border: none;
-      width: 100%;
-      height: auto;
-    }
-    #modalFooter {
-      padding: 12px 20px;
-      border-top: 1px solid #ccc;
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      background: #f9fbff;
-    }
-    #modalFooter textarea {
-      flex: 1;
-      resize: vertical;
-      min-height: 60px;
-      font-size: 16px;
-      padding: 12px 15px;
-      border-radius: 6px;
-      border: 1.8px solid #ccc;
-      transition: border-color 0.3s ease;
-    }
-    #modalFooter textarea:focus {
-      border-color: #007bff;
-      outline: none;
-      box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
-    }
+    body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f4f7fa;
+  color: #333;
+  padding: 40px 20px;
+  margin: 0;
+}
+h2 {
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 30px;
+  text-align: center;
+  letter-spacing: 1.2px;
+}
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: flex-end;
+  gap: 20px 30px;
+  margin-bottom: 30px;
+}
+.filters > div {
+  display: flex;
+  align-items: center;
+}
+.filters label {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+  color: #555;
+  min-width: 140px;
+}
+.filters label input,
+.filters label select {
+  padding: 10px 14px;
+  font-size: 15px;
+  border: 1.8px solid #ccc;
+  border-radius: 6px;
+  transition: border-color 0.3s ease;
+  outline-offset: 2px;
+  margin-bottom: 4px;
+}
+.filters input[type="date"]:focus,
+.filters select:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 6px rgba(0, 123, 255, 0.4);
+}
+.filters > div button {
+  margin-top: 22px;
+  background-color: #007bff;
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  padding: 12px 25px;
+  font-size: 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.25);
+}
+.filters > div button:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+.filters > div button:disabled {
+  background-color: #a3a3a3;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+#table-container {
+  overflow-x: auto;
+  box-shadow: 0 4px 20px rgb(0 0 0 / 0.05);
+  border-radius: 10px;
+  background: #fff;
+  padding: 20px;
+}
+table {
+  border-collapse: separate;
+  border-spacing: 0 8px;
+  width: 100%;
+  min-width: 900px;
+  font-size: 14.5px;
+  color: #444;
+}
+th, td {
+  padding: 14px 18px;
+  text-align: left;
+  vertical-align: middle;
+  background: #fff;
+  border: none;
+}
+th {
+  background-color: #e9f0ff;
+  font-weight: 600;
+  color: #007bff;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+tr:hover td {
+  background-color: #f5faff;
+}
+a.link-button {
+  color: #007bff;
+  cursor: pointer;
+  font-weight: 600;
+  text-decoration: underline;
+}
+a.link-button:visited {
+  color: #0056b3;
+}
+#modal {
+  display: none;
+  position: fixed;
+  z-index: 10000;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.6);
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+#modalContent {
+  background: #fff;
+  width: 100vw;
+  height: 100vh;
+  border-radius: 0;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10001;
+}
+#modalHeader {
+  padding: 10px 20px;
+  font-weight: 700;
+  font-size: 18px;
+  color: #007bff;
+  border-bottom: 1px solid #ccc;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f9fbff;
+}
+#closeModal {
+  cursor: pointer;
+  font-size: 28px;
+  font-weight: 700;
+  color: #007bff;
+  border: none;
+  background: none;
+}
+#modalIssues {
+  padding: 15px 20px;
+  background: #fff9e6;
+  color: #8a6d00;
+  font-size: 16px;
+  font-weight: 600;
+  border-bottom: 1px solid #f5e1a4;
+  max-height: 100px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+}
+#modalIframe {
+  flex: 1;
+  border: none;
+  width: 100%;
+  height: auto;
+}
+#modalFooter {
+  padding: 12px 20px;
+  border-top: 1px solid #ccc;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  background: #f9fbff;
+}
+#modalFooter textarea {
+  flex: 1;
+  resize: vertical;
+  min-height: 60px;
+  font-size: 16px;
+  padding: 12px 15px;
+  border-radius: 6px;
+  border: 1.8px solid #ccc;
+  transition: border-color 0.3s ease;
+}
+#modalFooter textarea:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+}
   </style>
 </head>
 <body>
@@ -319,38 +319,23 @@
 
   function renderTable(data) {
     if (!data.length) return document.getElementById('table-container').innerText = 'No matching data.';
-    let html = `<table><tr><th>Date</th><th>SKU_ID</th><th>Spin_ID</th><th>Issues</th><th>Validation Failed</th><th>Enterprise</th><th>User</th><th>Spin URL</th></tr>`;
+    let html = `<table><tr><th>Date</th><th>Spin_ID</th><th>SKU_ID</th><th>Issues</th><th>Enterprise</th><th>User</th><th>Spin URL</th></tr>`;
     data.forEach((r, i) => {
       const submitted = r._submitted || false;
       const linkClass = submitted ? 'link-button disabled' : 'link-button';
       const style = submitted ? 'pointer-events:none;color:gray;text-decoration:none;' : '';
-      const valFail = [r['validation_failure_reason'], r['vdp_validation_failure_reason']]
-                      .filter(v => v && v.trim()).join(' | ');
-      html += `<tr>
-        <td>${escapeHtml(new Date(r['Date']).toISOString().split('T')[0])}</td>
-        <td>${escapeHtml(r['SKU_ID'])}</td>
-        <td>${escapeHtml(r['Spin_ID'])}</td>
-        <td>${escapeHtml(r['Issues'] || '').replace(/
-/g, '<br>')}</td>
-        <td>${escapeHtml(valFail)}</td>
-        <td>${escapeHtml(r['Enterprise'])}</td>
-        <td>${escapeHtml(r['User'])}</td>
-        <td><a class="${linkClass}" style="${style}" onclick="openModal(${i})" href="javascript:void(0)">View Spin</a></td>
-      </tr>`;
+      html += `<tr><td>${escapeHtml(new Date(r['Date']).toISOString().split('T')[0])}</td><td>${escapeHtml(r['Spin_ID'])}</td><td>${escapeHtml(r['SKU_ID'])}</td>
+               <td>${escapeHtml(r['Issues'] || '').replace(/\n/g, '<br>')}</td><td>${escapeHtml(r['Enterprise'])}</td><td>${escapeHtml(r['User'])}</td>
+               <td><a class="${linkClass}" style="${style}" onclick="openModal(${i})" href="javascript:void(0)">View Spin</a></td></tr>`;
     });
     document.getElementById('table-container').innerHTML = html + '</table>';
+  }
 
   function openModal(i) {
     currentModalIndex = i;
     const row = filteredData[i];
     document.getElementById('modalIframe').src = row['spin_url'] || '';
-    let issueText = row['Issues'] || 'No issues reported.';
-    const valFail = [row['validation_failure_reason'], row['vdp_validation_failure_reason']]
-                    .filter(v => v && v.trim()).join(' | ');
-    if (valFail) issueText += `
-
-Validation Failed: ${valFail}`;
-    document.getElementById('modalIssues').textContent = issueText;
+    document.getElementById('modalIssues').textContent = row['Issues'] || 'No issues reported.';
     const commentBox = document.getElementById('modalComment');
     commentBox.value = '';
     document.getElementById('modal').style.display = 'flex';
