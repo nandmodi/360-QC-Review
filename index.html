@@ -245,13 +245,25 @@
     };
 
     function openModal(i) {
-      currentModalIndex = i;
-      const row = filteredData[i];
-      document.getElementById('modalIframe').src = row['spin_url'] || '';
-      document.getElementById('modalIssues').textContent = row['Issues'] || 'No issues reported.';
-      document.getElementById('modalComment').value = '';
-      document.getElementById('modal').style.display = 'flex';
-    }
+  currentModalIndex = i;
+  const row = filteredData[i];
+  document.getElementById('modalIframe').src = row['spin_url'] || '';
+
+  let issuesText = row['Issues'] || 'No issues reported.';
+  let validationText = '';
+  if (row['validation_failure_reason']) validationText += `
+Validation Failure: ${row['validation_failure_reason']}`;
+  if (row['vdp_validation_failure_reason']) validationText += `
+VDP Validation Failure: ${row['vdp_validation_failure_reason']}`;
+
+  let metaInfo = `
+SKU_ID: ${row['SKU_ID'] || 'N/A'}
+Enterprise: ${row['Enterprise'] || 'N/A'}`;
+
+  document.getElementById('modalIssues').textContent = issuesText + validationText + metaInfo;
+  document.getElementById('modalComment').value = '';
+  document.getElementById('modal').style.display = 'flex';
+}
 
     function closeModal() {
       document.getElementById('modal').style.display = 'none';
