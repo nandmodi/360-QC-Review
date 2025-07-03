@@ -187,8 +187,8 @@
 </head>
 <body>
   <h2>360 QC Review Dashboard</h2>
-  
-    <div><button onclick="resetFilters()">Reset</button></div>
+  <div class="filters">
+    <label>Start Date: <input type="date" id="startDate" /></label>
     <label>End Date: <input type="date" id="endDate" /></label>
     <label>User: <select id="userFilter"><option value="">All</option></select></label>
     <label>Enterprise: <select id="enterpriseFilter"><option value="">All</option></select></label>
@@ -202,6 +202,7 @@
       </select>
     </label>
     <div><button onclick="applyFilters()">Filter</button></div>
+    <div><button onclick="resetFilters()">Reset</button></div>
   </div>
   <div id="table-container">Loading...</div>
 
@@ -309,7 +310,7 @@
       const style = submitted ? 'pointer-events:none;color:gray;text-decoration:none;' : '';
       html += `<tr><td>${escapeHtml(new Date(r['Date']).toISOString().split('T')[0])}</td><td>${escapeHtml(r['Spin_ID'])}</td><td>${escapeHtml(r['SKU_ID'])}</td>
                <td>${escapeHtml(r['Issues'] || '').replace(/
-/g, '<br>')}</td><td>${escapeHtml(r['Enterprise'])}</td><td>${escapeHtml(r['User'])}</td>
+/g, '<br />')}</td><td>${escapeHtml(r['Enterprise'])}</td><td>${escapeHtml(r['User'])}</td>
                <td><a class="${linkClass}" style="${style}" onclick="openModal(${i})" href="javascript:void(0)">View Spin</a></td></tr>`;
     });
     document.getElementById('table-container').innerHTML = html + '</table>';
@@ -394,7 +395,16 @@ SKU ID: ${row['SKU_ID'] || 'N/A'}`;
     document.body.removeChild(form);
   }
 
-  window.onload = () => {
+  function resetFilters() {
+  document.getElementById('startDate').value = '';
+  document.getElementById('endDate').value = '';
+  document.getElementById('userFilter').value = '';
+  document.getElementById('enterpriseFilter').value = '';
+  document.getElementById('issueFilter').value = '';
+  applyFilters();
+}
+
+window.onload = () => {
     const today = new Date().toISOString().split('T')[0];
     const lastWeek = new Date();
     lastWeek.setDate(lastWeek.getDate() - 7);
