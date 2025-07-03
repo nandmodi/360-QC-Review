@@ -247,6 +247,7 @@
       Papa.parse(csv, {
         header: true, skipEmptyLines: true, transformHeader: h => h.trim(),
         complete: results => {
+          console.log("Parsed rows:", results.data.length);
           globalData = results.data;
           populateDropdowns();
           applyFilters();
@@ -280,7 +281,12 @@
     filteredData = globalData.filter(row => {
       let rawDate = '';
       try {
-        rawDate = new Date(row['Date']).toISOString().split('T')[0];
+        const parsed = Date.parse(row['Date']);
+        if (!isNaN(parsed)) {
+          rawDate = new Date(parsed).toISOString().split('T')[0];
+        } else {
+          return false;
+        }
       } catch (e) {
         return false;
       }
@@ -298,6 +304,8 @@
       return true;
     });
 
+    console.log("Filtered rows:", filteredData.length);
+    console.table(filteredData.slice(0, 5));
     renderTable(filteredData);
   }
 
