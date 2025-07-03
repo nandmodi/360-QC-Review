@@ -153,6 +153,10 @@
         Papa.parse(csv, {
           header: true, skipEmptyLines: true, transformHeader: h => h.trim(),
           complete: results => {
+            console.log("Parsed CSV rows:", results.data);
+            if (!results.data || results.data.length === 0) {
+              alert("No data parsed from CSV. Please verify Google Sheet is published.");
+            }
             globalData = results.data;
             populateDropdowns();
             applyFilters();
