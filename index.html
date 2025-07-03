@@ -109,80 +109,6 @@
     a.link-button:visited {
       color: #0056b3;
     }
-    #modal {
-      display: none;
-      position: fixed;
-      z-index: 10000;
-      top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0,0,0,0.6);
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
-    #modalContent {
-      background: #fff;
-      width: 100vw;
-      height: 100vh;
-      border-radius: 0;
-      display: flex;
-      flex-direction: column;
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: 10001;
-    }
-    #modalHeader {
-      padding: 10px 20px;
-      font-weight: 700;
-      font-size: 18px;
-      color: #007bff;
-      border-bottom: 1px solid #ccc;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #f9fbff;
-    }
-    #closeModal {
-      cursor: pointer;
-      font-size: 28px;
-      font-weight: 700;
-      color: #007bff;
-      border: none;
-      background: none;
-    }
-    #modalIssues {
-      padding: 15px 20px;
-      background: #fff9e6;
-      color: #8a6d00;
-      font-size: 16px;
-      font-weight: 600;
-      border-bottom: 1px solid #f5e1a4;
-      max-height: 100px;
-      overflow-y: auto;
-      white-space: pre-wrap;
-    }
-    #modalValidation {
-      padding: 15px 20px;
-      background: #e6f7ff;
-      color: #004085;
-      font-size: 15px;
-      font-weight: 600;
-      border-bottom: 1px solid #b8daff;
-      max-height: 120px;
-      overflow-y: auto;
-      white-space: pre-wrap;
-    }
-    #modalDetails {
-      padding: 15px 20px;
-      background: #f0f4f8;
-      color: #333;
-      font-size: 15px;
-      font-weight: 500;
-      border-bottom: 1px solid #d0dae5;
-      white-space: pre-wrap;
-    }
   </style>
 </head>
 <body>
@@ -206,157 +132,172 @@
   </div>
   <div id="table-container">Loading...</div>
 
-  <div id="modal">
-    <div id="modalContent">
-      <div id="modalHeader">
-        <div>Spin Viewer</div>
-        <button id="closeModal" title="Close">&times;</button>
-      </div>
-      <div id="modalIssues"></div>
-      <div id="modalValidation"></div>
-      <div id="modalDetails"></div>
-      <iframe id="modalIframe" src=""></iframe>
-      <div id="modalFooter">
-        <textarea id="modalComment" placeholder="Enter your comment here..."></textarea>
-        <button id="modalSubmitBtn">Submit</button>
-      </div>
-    </div>
-  </div>
-
-  <iframe name="hidden_iframe" style="display:none;"></iframe>
-
   <script>
-  const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vThoeXNovzUYQaHoFqHYY8p4hxrGTJWUPF8dQs0cinxvypfUVwAzFu74l06jhqXm0x611kRke13fa2t/pub?gid=0&single=true&output=csv';
-  const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeQH6R9-rYr1Kh2rwUBKu7uGvJAkRrvx8fnxF6jfkac7sNL2A/formResponse';
+    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vThoeXNovzUYQaHoFqHYY8p4hxrGTJWUPF8dQs0cinxvypfUVwAzFu74l06jhqXm0x611kRke13fa2t/pub?gid=0&single=true&output=csv';
 
-  let globalData = [], filteredData = [], currentModalIndex = null;
+    let globalData = [], filteredData = [];
 
-  function escapeHtml(text) {
-    return text ? text.replace(/
-/g, '<br>').replace(/</g, "&lt;").replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;").replace(/'/g, "&#39;") : '';
-  }
+    function escapeHtml(text) {
+      return text ? text.replace(/\n/g, '<br>').replace(/</g, "&lt;").replace(/>/g, "&gt;")
+                  .replace(/"/g, "&quot;").replace(/'/g, "&#39;") : '';
+    }
 
-  function escapeHtmlAttr(text) {
-    return text ? text.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/'/g, "&#39;")
-                .replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
-  }
-
-  function loadAndFilterCSV() {
-    fetch(CSV_URL).then(res => res.text()).then(csv => {
-      Papa.parse(csv, {
-        header: true, skipEmptyLines: true, transformHeader: h => h.trim(),
-        complete: results => {
-          console.log("Parsed rows:", results.data.length);
-          globalData = results.data;
-          populateDropdowns();
-          applyFilters();
-        }
+    function loadAndFilterCSV() {
+      fetch(CSV_URL).then(res => res.text()).then(csv => {
+        Papa.parse(csv, {
+          header: true, skipEmptyLines: true, transformHeader: h => h.trim(),
+          complete: results => {
+            console.log("Parsed rows:", results.data.length);
+            globalData = results.data;
+            populateDropdowns();
+            applyFilters();
+          }
+        });
+      }).catch(err => {
+        const errorMsg = 'Error fetching CSV: ' + (err.message || err);
+        document.getElementById('table-container').innerText = errorMsg;
+        console.error("CSV fetch error:", err);
       });
-    }).catch(err => {
-      document.getElementById('table-container').innerText = 'Error fetching CSV.';
-      console.error(err);
-    });
-  }
+    }
 
-  function populateDropdowns() {
-    const users = new Set(), enterprises = new Set();
-    globalData.forEach(r => {
-      if (r['User']) users.add(r['User']);
-      if (r['Enterprise']) enterprises.add(r['Enterprise']);
-    });
-    document.getElementById('userFilter').innerHTML =
-      '<option value="">All</option>' + [...users].map(u => `<option>${escapeHtml(u)}</option>`).join('');
-    document.getElementById('enterpriseFilter').innerHTML =
-      '<option value="">All</option>' + [...enterprises].map(e => `<option>${escapeHtml(e)}</option>`).join('');
-  }
+    function populateDropdowns() {
+      const users = new Set(), enterprises = new Set();
+      globalData.forEach(r => {
+        if (r['User']) users.add(r['User']);
+        if (r['Enterprise']) enterprises.add(r['Enterprise']);
+      });
+      document.getElementById('userFilter').innerHTML =
+        '<option value="">All</option>' + [...users].map(u => `<option>${escapeHtml(u)}</option>`).join('');
+      document.getElementById('enterpriseFilter').innerHTML =
+        '<option value="">All</option>' + [...enterprises].map(e => `<option>${escapeHtml(e)}</option>`).join('');
+    }
 
-  function applyFilters() {
-    const start = document.getElementById('startDate').value;
-    const end = document.getElementById('endDate').value;
-    const user = document.getElementById('userFilter').value.toLowerCase();
-    const ent = document.getElementById('enterpriseFilter').value.toLowerCase();
-    const issueFilter = document.getElementById('issueFilter').value.toLowerCase();
+    function applyFilters() {
+      const start = document.getElementById('startDate').value;
+      const end = document.getElementById('endDate').value;
+      const user = document.getElementById('userFilter').value.toLowerCase();
+      const ent = document.getElementById('enterpriseFilter').value.toLowerCase();
+      const issueFilter = document.getElementById('issueFilter').value.toLowerCase();
 
-    filteredData = globalData.filter(row => {
-      let rawDate = '';
-      try {
-        const parsed = Date.parse(row['Date']);
-        if (!isNaN(parsed)) {
-          rawDate = new Date(parsed).toISOString().split('T')[0];
-        } else {
+      filteredData = globalData.filter(row => {
+        let rawDate = '';
+        try {
+          const parsed = Date.parse(row['Date']);
+          if (!isNaN(parsed)) {
+            rawDate = new Date(parsed).toISOString().split('T')[0];
+          } else {
+            return false;
+          }
+        } catch (e) {
           return false;
         }
-      } catch (e) {
-        return false;
-      }
 
-      if (!row['User'] || !rawDate) return false;
-      if (start && rawDate < start) return false;
-      if (end && rawDate > end) return false;
-      if (user && row['User'].toLowerCase() !== user) return false;
-      if (ent && row['Enterprise'].toLowerCase() !== ent) return false;
+        if (!row['User'] || !rawDate) return false;
+        if (start && rawDate < start) return false;
+        if (end && rawDate > end) return false;
+        if (user && row['User'].toLowerCase() !== user) return false;
+        if (ent && row['Enterprise'].toLowerCase() !== ent) return false;
 
-      const issues = (row['Issues'] || '').toLowerCase().trim();
-      if (issueFilter === 'nullblank' && issues.length > 0) return false;
-      if (issueFilter && issueFilter !== 'nullblank' && !issues.includes(issueFilter)) return false;
+        const issues = (row['Issues'] || '').toLowerCase().trim();
+        if (issueFilter === 'nullblank' && issues.length > 0) return false;
+        if (issueFilter && issueFilter !== 'nullblank' && !issues.includes(issueFilter)) return false;
 
-      return true;
-    });
+        return true;
+      });
 
-    console.log("Filtered rows:", filteredData.length);
-    console.table(filteredData.slice(0, 5));
-    renderTable(filteredData);
-  }
+      console.log("Filtered rows:", filteredData.length);
+      console.table(filteredData.slice(0, 5));
+      renderTable(filteredData);
+    }
 
-  function renderTable(data) {
-    if (!data.length) return document.getElementById('table-container').innerText = 'No matching data.';
-    let html = `<table><tr><th>Date</th><th>Spin_ID</th><th>SKU_ID</th><th>Issues</th><th>Enterprise</th><th>User</th><th>Spin URL</th></tr>`;
-    data.forEach((r, i) => {
-      const submitted = r._submitted || false;
-      const linkClass = submitted ? 'link-button disabled' : 'link-button';
-      const style = submitted ? 'pointer-events:none;color:gray;text-decoration:none;' : '';
-      html += `<tr><td>${escapeHtml(new Date(r['Date']).toISOString().split('T')[0])}</td><td>${escapeHtml(r['Spin_ID'])}</td><td>${escapeHtml(r['SKU_ID'])}</td>
-               <td>${escapeHtml(r['Issues'] || '').replace(/
-/g, '<br />')}</td><td>${escapeHtml(r['Enterprise'])}</td><td>${escapeHtml(r['User'])}</td>
-               <td><a class="${linkClass}" style="${style}" onclick="openModal(${i})" href="javascript:void(0)">View Spin</a></td></tr>`;
-    });
-    document.getElementById('table-container').innerHTML = html + '</table>';
-  }
+    function renderTable(data) {
+      if (!data.length) return document.getElementById('table-container').innerText = 'No matching data.';
+      let html = `<table><tr><th>Date</th><th>Spin_ID</th><th>SKU_ID</th><th>Issues</th><th>Enterprise</th><th>User</th><th>Spin URL</th></tr>`;
+      data.forEach((r, i) => {
+        html += `<tr><td>${escapeHtml(new Date(r['Date']).toISOString().split('T')[0])}</td><td>${escapeHtml(r['Spin_ID'])}</td><td>${escapeHtml(r['SKU_ID'])}</td>
+                 <td>${escapeHtml(r['Issues'] || '')}</td><td>${escapeHtml(r['Enterprise'])}</td><td>${escapeHtml(r['User'])}</td>
+                 <td><a class="link-button" onclick="alert('View Spin logic here')" href="#">View Spin</a></td></tr>`;
+      });
+      document.getElementById('table-container').innerHTML = html + '</table>';
+    }
+
+    function resetFilters() {
+      document.getElementById('startDate').value = '';
+      document.getElementById('endDate').value = '';
+      document.getElementById('userFilter').value = '';
+      document.getElementById('enterpriseFilter').value = '';
+      document.getElementById('issueFilter').value = '';
+      applyFilters();
+    }
+
+    window.onload = () => {
+      const today = new Date().toISOString().split('T')[0];
+      const lastWeek = new Date();
+      lastWeek.setDate(lastWeek.getDate() - 7);
+      document.getElementById('endDate').value = today;
+      document.getElementById('startDate').value = lastWeek.toISOString().split('T')[0];
+      loadAndFilterCSV();
+    };
+  </script>
+<div id="modal">
+  <div id="modalContent" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:white; z-index:1001; flex-direction:column;">
+    <div id="modalHeader" style="padding:10px; background:#f9fbff; border-bottom:1px solid #ccc; display:flex; justify-content:space-between; align-items:center;">
+      <div style="font-weight:700; color:#007bff;">Spin Viewer</div>
+      <button id="closeModal" style="font-size:24px; background:none; border:none; cursor:pointer; color:#007bff;">&times;</button>
+    </div>
+    <div id="modalIssues" style="padding:15px; font-weight:600; background:#fff9e6; color:#8a6d00; border-bottom:1px solid #f5e1a4;"></div>
+    <iframe id="modalIframe" src="" style="flex:1; width:100%; border:none;"></iframe>
+    <div id="modalFooter" style="padding:12px; border-top:1px solid #ccc; display:flex; gap:10px;">
+      <textarea id="modalComment" placeholder="Enter your comment here..." style="flex:1; min-height:60px; padding:10px; border-radius:6px; border:1px solid #ccc;"></textarea>
+      <button id="modalSubmitBtn" style="padding:10px 20px; background:#007bff; color:#fff; border:none; border-radius:6px; font-weight:600; cursor:pointer;">Submit</button>
+    </div>
+  </div>
+</div>
+<iframe name="hidden_iframe" style="display:none;"></iframe>
+<script>
+  const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeQH6R9-rYr1Kh2rwUBKu7uGvJAkRrvx8fnxF6jfkac7sNL2A/formResponse';
 
   function openModal(i) {
     currentModalIndex = i;
     const row = filteredData[i];
     document.getElementById('modalIframe').src = row['spin_url'] || '';
     document.getElementById('modalIssues').textContent = row['Issues'] || 'No issues reported.';
-
-    const val1 = row['validation_failure_reason'] || '';
-    const val2 = row['vdp_validation_failure_reason'] || '';
-    let validationText = '';
-
-    if (val1.trim() || val2.trim()) {
-      if (val1.trim()) validationText += `Validation Failure: ${val1.trim()}
-`;
-      if (val2.trim()) validationText += `VDP Validation Failure: ${val2.trim()}`;
-    } else {
-      validationText = 'No validation failure noted.';
-    }
-    document.getElementById('modalValidation').textContent = validationText;
-
-    document.getElementById('modalDetails').textContent = 
-      `User: ${row['User'] || 'N/A'}
-Enterprise: ${row['Enterprise'] || 'N/A'}
-SKU ID: ${row['SKU_ID'] || 'N/A'}`;
-
-    const commentBox = document.getElementById('modalComment');
-    commentBox.value = '';
-    document.getElementById('modal').style.display = 'flex';
-    setTimeout(() => commentBox.focus(), 100);
+    document.getElementById('modalComment').value = '';
+    document.getElementById('modalContent').style.display = 'flex';
   }
 
   function closeModal() {
-    document.getElementById('modal').style.display = 'none';
+    document.getElementById('modalContent').style.display = 'none';
     document.getElementById('modalIframe').src = '';
+  }
+
+  function submitFormRow(i, commentValue) {
+    const row = filteredData[i];
+    const form = document.createElement("form");
+    form.action = FORM_URL;
+    form.method = "POST";
+    form.target = "hidden_iframe";
+    form.style.display = "none";
+    form.innerHTML = `
+      <input name="entry.1125049159" value="${escapeHtml(row['Spin_ID'])}">
+      <input name="entry.703277665" value="${escapeHtml(row['SKU_ID'])}">
+      <input name="entry.1815472287" value="${escapeHtml(row['Enterprise'])}">
+      <input name="entry.582537694" value="${escapeHtml(row['User'])}">
+      <input name="entry.575622617" value="${escapeHtml(row['Issues'])}">
+      <input name="entry.1751143375" value="${escapeHtml(commentValue)}">
+      <input name="entry.1372347436" value="${escapeHtml(row['spin_url'])}">
+    `;
+    const iframe = document.getElementsByName('hidden_iframe')[0];
+    iframe.onload = () => {
+      filteredData[i]._submitted = true;
+      renderTable(filteredData);
+      closeModal();
+      const nextIndex = filteredData.findIndex((r, idx) => idx > i && !r._submitted);
+      if (nextIndex !== -1) setTimeout(() => openModal(nextIndex), 300);
+    };
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
   }
 
   document.getElementById('closeModal').onclick = closeModal;
@@ -373,53 +314,6 @@ SKU ID: ${row['SKU_ID'] || 'N/A'}`;
       document.getElementById('modalSubmitBtn').click();
     }
   });
-
-  function submitFormRow(i, commentValue) {
-    const row = filteredData[i];
-    const form = document.createElement("form");
-    form.action = FORM_URL;
-    form.method = "POST";
-    form.target = "hidden_iframe";
-    form.style.display = "none";
-    form.innerHTML = `
-      <input name="entry.1125049159" value="${escapeHtmlAttr(row['Spin_ID'])}">
-      <input name="entry.703277665" value="${escapeHtmlAttr(row['SKU_ID'])}">
-      <input name="entry.1815472287" value="${escapeHtmlAttr(row['Enterprise'])}">
-      <input name="entry.582537694" value="${escapeHtmlAttr(row['User'])}">
-      <input name="entry.575622617" value="${escapeHtmlAttr(row['Issues'])}">
-      <input name="entry.1751143375" value="${escapeHtmlAttr(commentValue)}">
-      <input name="entry.1372347436" value="${escapeHtmlAttr(row['spin_url'])}">
-    `;
-    const iframe = document.getElementsByName('hidden_iframe')[0];
-    iframe.onload = () => {
-      filteredData[i]._submitted = true;
-      renderTable(filteredData);
-      closeModal();
-      const nextIndex = filteredData.findIndex((r, idx) => idx > i && !r._submitted);
-      if (nextIndex !== -1) setTimeout(() => openModal(nextIndex), 300);
-    };
-    document.body.appendChild(form);
-    form.submit();
-    document.body.removeChild(form);
-  }
-
-  function resetFilters() {
-  document.getElementById('startDate').value = '';
-  document.getElementById('endDate').value = '';
-  document.getElementById('userFilter').value = '';
-  document.getElementById('enterpriseFilter').value = '';
-  document.getElementById('issueFilter').value = '';
-  applyFilters();
-}
-
-window.onload = () => {
-    const today = new Date().toISOString().split('T')[0];
-    const lastWeek = new Date();
-    lastWeek.setDate(lastWeek.getDate() - 7);
-    document.getElementById('endDate').value = today;
-    document.getElementById('startDate').value = lastWeek.toISOString().split('T')[0];
-    loadAndFilterCSV();
-  };
 </script>
 </body>
 </html>
