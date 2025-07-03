@@ -249,18 +249,29 @@
   const row = filteredData[i];
   document.getElementById('modalIframe').src = row['spin_url'] || '';
 
-  let issuesText = row['Issues'] || 'No issues reported.';
-  let validationText = '';
-  if (row['validation_failure_reason']) validationText += `
-Validation Failure: ${row['validation_failure_reason']}`;
-  if (row['vdp_validation_failure_reason']) validationText += `
-VDP Validation Failure: ${row['vdp_validation_failure_reason']}`;
+  const issues = row['Issues'] || 'No issues reported.';
+  const validation1 = row['validation_failure_reason'] || '';
+  const validation2 = row['vdp_validation_failure_reason'] || '';
+  const validation = [validation1, validation2].filter(Boolean).join(', ') || 'No validation error.';
+  const enterprise = row['Enterprise'] || 'N/A';
+  const sku = row['SKU_ID'] || 'N/A';
+  const spin = row['Spin_ID'] || 'N/A';
 
-  let metaInfo = `
-SKU_ID: ${row['SKU_ID'] || 'N/A'}
-Enterprise: ${row['Enterprise'] || 'N/A'}`;
+  document.getElementById('modalIssues').innerHTML = `
+    <table style="width:100%; border-collapse: collapse;">
+      <tr>
+        <td rowspan="2" style="border:1px solid #ccc; padding:8px; vertical-align: top;"><strong>Issue</strong><br>${escapeHtml(issues).replace(/
+/g, '<br>')}</td>
+        <td style="border:1px solid #ccc; padding:8px;"><strong>Enterprise</strong><br>${escapeHtml(enterprise)}</td>
+        <td style="border:1px solid #ccc; padding:8px;"><strong>Sku ID</strong><br>${escapeHtml(sku)}</td>
+      </tr>
+      <tr>
+        <td style="border:1px solid #ccc; padding:8px;"><strong>Validation</strong><br>${escapeHtml(validation)}</td>
+        <td style="border:1px solid #ccc; padding:8px;"><strong>Spin ID</strong><br>${escapeHtml(spin)}</td>
+      </tr>
+    </table>
+  `;
 
-  document.getElementById('modalIssues').textContent = issuesText + validationText + metaInfo;
   document.getElementById('modalComment').value = '';
   document.getElementById('modal').style.display = 'flex';
 }
