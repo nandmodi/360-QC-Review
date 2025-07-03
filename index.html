@@ -264,8 +264,8 @@
   document.getElementById('modalIssues').innerHTML = `
     <table style="width:100%; border-collapse: collapse;">
       <tr>
-        <td rowspan="2" style="border:1px solid #ccc; padding:8px; vertical-align: top;"><strong>Issue</strong><br>${escapeHtml(issues).replace(/
-/g, '<br>')}</td>
+        <td rowspan="2" style="border:1px solid #ccc; padding:8px; vertical-align: top;"><strong>Issue</strong><br>${(() => { console.log('Raw issues:', issues); return escapeHtml(issues).replace(/
+/g, '<br>'); })()}</td>
         <td style="border:1px solid #ccc; padding:8px;"><strong>Enterprise</strong><br>${escapeHtml(enterprise)}</td>
         <td style="border:1px solid #ccc; padding:8px;"><strong>Sku ID</strong><br>${escapeHtml(sku)}</td>
       </tr>
