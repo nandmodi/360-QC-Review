@@ -311,6 +311,9 @@
       if (issueFilter === 'nullblank' && issues.length > 0) return false;
       if (issueFilter && issueFilter !== 'nullblank' && !issues.includes(issueFilter)) return false;
 
+      // Check if the "status" column has a value
+      if (row['status'] && row['status'].trim() !== '') return false;
+
       return true;
     });
 
