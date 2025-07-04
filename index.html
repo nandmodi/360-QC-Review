@@ -383,6 +383,7 @@
     const enterprise = row['Enterprise'] || 'N/A';
     const sku = row['SKU_ID'] || 'N/A';
     const spin = row['Spin_ID'] || 'N/A';
+    const user = row['User'] || 'N/A';  // Display User Name
 
     document.getElementById('modalIssues').innerHTML = 
       `<table style="width:100%; border-collapse: collapse;">
@@ -396,7 +397,8 @@
           <td style="border:1px solid #ccc; padding:8px;"><strong>Spin ID</strong><br>${escapeHtml(spin)}</td>
         </tr>
       </table>
-    `;
+      <p><strong>User:</strong> ${escapeHtml(user)}</p>`;  // Display User Name here
+    
     document.getElementById('modalComment').value = '';
     document.getElementById('modal').style.display = 'flex';
 
@@ -411,6 +413,51 @@
     document.getElementById('startDate').value = lastWeek.toISOString().split('T')[0];
     loadAndFilterCSV();
   };
+
+  function setupAutocomplete() {
+    const commentBox = document.getElementById('modalComment');
+    commentBox.addEventListener('input', function() {
+      const value = commentBox.value.trim();
+      if (!value) {
+        if (autocompleteDiv) autocompleteDiv.style.display = 'none';
+        return;
+      }
+      
+      const filteredSuggestions = suggestions.filter(suggestion => suggestion.toLowerCase().includes(value.toLowerCase()) && !selectedIssues.includes(suggestion));
+      
+      if (filteredSuggestions.length === 0) {
+        if (autocompleteDiv) autocompleteDiv.style.display = 'none';
+        return;
+      }
+
+      if (!autocompleteDiv) {
+        autocompleteDiv = document.createElement('div');
+        autocompleteDiv.classList.add('autocomplete-suggestions');
+        commentBox.parentNode.appendChild(autocompleteDiv);
+      }
+
+      autocompleteDiv.innerHTML = filteredSuggestions.map(suggestion => 
+        `<div class="autocomplete-suggestion">${escapeHtml(suggestion)}</div>`
+      ).join('');
+      autocompleteDiv.style.display = 'block';
+
+      // Handle suggestion click
+      const suggestionElements = autocompleteDiv.querySelectorAll('.autocomplete-suggestion');
+      suggestionElements.forEach(suggestionElement => {
+        suggestionElement.addEventListener('click', function() {
+          commentBox.value = commentBox.value ? commentBox.value + ', ' + suggestionElement.textContent : suggestionElement.textContent;
+          selectedIssues.push(suggestionElement.textContent);
+          autocompleteDiv.style.display = 'none';
+        });
+      });
+    });
+
+    commentBox.addEventListener('blur', function() {
+      setTimeout(() => {
+        if (autocompleteDiv) autocompleteDiv.style.display = 'none';
+      }, 100);
+    });
+  }
 </script>
 
 </body>
