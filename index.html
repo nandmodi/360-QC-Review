@@ -254,19 +254,32 @@
   }
 
   function loadAndFilterCSV() {
-    fetch(CSV_URL).then(res => res.text()).then(csv => {
-      Papa.parse(csv, {
-        header: true, skipEmptyLines: true, transformHeader: h => h.trim(),
-        complete: results => {
-          globalData = results.data;
-          populateDropdowns();
-          applyFilters();
+    fetch(CSV_URL)
+      .then(res => {
+        console.log('Response:', res);  // Log the response to check if it's OK
+        if (!res.ok) {
+          throw new Error('Failed to fetch CSV file');  // Handle network errors
         }
+        return res.text();  // Proceed to get the text content
+      })
+      .then(csv => {
+        console.log('CSV Data:', csv);  // Log CSV data to verify it's fetched
+        Papa.parse(csv, {
+          header: true,
+          skipEmptyLines: true,
+          transformHeader: h => h.trim(),
+          complete: results => {
+            globalData = results.data;
+            console.log('Parsed CSV:', globalData);  // Log parsed data to ensure it's correct
+            populateDropdowns();
+            applyFilters();
+          }
+        });
+      })
+      .catch(err => {
+        document.getElementById('table-container').innerText = 'Error fetching CSV.';
+        console.error('CSV Fetch Error:', err);  // Log detailed error message
       });
-    }).catch(err => {
-      document.getElementById('table-container').innerText = 'Error fetching CSV.';
-      console.error(err);
-    });
   }
 
   function applyFilters() {
