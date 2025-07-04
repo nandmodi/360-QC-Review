@@ -6,203 +6,203 @@
   <link rel="icon" href="https://spyne-prod-ai.s3.us-east-1.amazonaws.com/ai-dataset/2025/favicon.ico" type="image/x-icon" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
   <style>
-  body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #f4f7fa;
-    color: #333;
-    padding: 40px 20px;
-    margin: 0;
-  }
-  h2 {
-    font-weight: 700;
-    color: #222;
-    margin-bottom: 30px;
-    text-align: center;
-    letter-spacing: 1.2px;
-  }
-  .filters {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    align-items: flex-end;
-    gap: 20px 30px;
-    margin-bottom: 30px;
-  }
-  .filters > div {
-    display: flex;
-    align-items: center;
-  }
-  .filters label {
-    display: flex;
-    flex-direction: column;
-    font-size: 14px;
-    color: #555;
-    min-width: 140px;
-  }
-  .filters label input,
-  .filters label select {
-    padding: 10px 14px;
-    font-size: 15px;
-    border: 1.8px solid #ccc;
-    border-radius: 6px;
-    transition: border-color 0.3s ease;
-    outline-offset: 2px;
-    margin-bottom: 4px;
-  }
-  .filters input[type="date"]:focus,
-  .filters select:focus {
-    border-color: #007bff;
-    outline: none;
-    box-shadow: 0 0 6px rgba(0, 123, 255, 0.4);
-  }
-  .filters > div button {
-    margin-top: 22px;
-    background-color: #007bff;
-    border: none;
-    color: #fff;
-    font-weight: 600;
-    padding: 12px 25px;
-    font-size: 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.25);
-  }
-  .filters > div button:hover:not(:disabled) {
-    background-color: #0056b3;
-  }
-  .filters > div button:disabled {
-    background-color: #a3a3a3;
-    cursor: not-allowed;
-    box-shadow: none;
-  }
-  #table-container {
-    overflow-x: auto;
-    box-shadow: 0 4px 20px rgb(0 0 0 / 0.05);
-    border-radius: 10px;
-    background: #fff;
-    padding: 20px;
-  }
-  table {
-    border-collapse: separate;
-    border-spacing: 0 8px;
-    width: 100%;
-    min-width: 900px;
-    font-size: 14.5px;
-    color: #444;
-  }
-  th, td {
-    padding: 14px 18px;
-    text-align: left;
-    vertical-align: middle;
-    background: #fff;
-    border: none;
-  }
-  th {
-    background-color: #e9f0ff;
-    font-weight: 600;
-    color: #007bff;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-  tr:hover td {
-    background-color: #f5faff;
-  }
-  a.link-button {
-    color: #007bff;
-    cursor: pointer;
-    font-weight: 600;
-    text-decoration: underline;
-  }
-  a.link-button:visited {
-    color: #0056b3;
-  }
-  #modal {
-    display: none;
-    position: fixed;
-    z-index: 10000;
-    top: 0; left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0,0,0,0.6);
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-  }
-  #modalContent {
-  background: #fff;
-  width: 100vw;
-  height: 100vh;
-  border-radius: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: start;
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 10001;
-}
-  #modalHeader {
-    padding: 10px 20px;
-    font-weight: 700;
-    font-size: 18px;
-    color: #007bff;
-    border-bottom: 1px solid #ccc;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #f9fbff;
-  }
-  #closeModal {
-    cursor: pointer;
-    font-size: 28px;
-    font-weight: 700;
-    color: #007bff;
-    border: none;
-    background: none;
-  }
-  #modalIssues {
-  padding: 0;
-  background: #fff;
-  color: #333;
-  font-size: 0px;
-  font-weight: 500;
-  border-bottom: 1px solid #e2e2e2;
-  white-space: pre-wrap;
-  max-height: none;
-  overflow-y: visible;
-}
-  #modalIframe {
-  flex: 1;
-  border: none;
-  width: 100%;
-  height: calc(100vh - 160px);
-  margin-top: 0;
-}
-  #modalFooter {
-    padding: 12px 20px;
-    border-top: 1px solid #ccc;
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    background: #f9fbff;
-  }
-  #modalFooter textarea {
-  flex: 1;
-  resize: vertical;
-  min-height: 40px;
-  font-size: 14px;
-  padding: 8px 12px;
-  border-radius: 6px;
-  border: 1.8px solid #ccc;
-  transition: border-color 0.3s ease;
-}
-  #modalFooter textarea:focus {
-    border-color: #007bff;
-    outline: none;
-    box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
-  }
-</style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f7fa;
+      color: #333;
+      padding: 40px 20px;
+      margin: 0;
+    }
+    h2 {
+      font-weight: 700;
+      color: #222;
+      margin-bottom: 30px;
+      text-align: center;
+      letter-spacing: 1.2px;
+    }
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      align-items: flex-end;
+      gap: 20px 30px;
+      margin-bottom: 30px;
+    }
+    .filters > div {
+      display: flex;
+      align-items: center;
+    }
+    .filters label {
+      display: flex;
+      flex-direction: column;
+      font-size: 14px;
+      color: #555;
+      min-width: 140px;
+    }
+    .filters label input,
+    .filters label select {
+      padding: 10px 14px;
+      font-size: 15px;
+      border: 1.8px solid #ccc;
+      border-radius: 6px;
+      transition: border-color 0.3s ease;
+      outline-offset: 2px;
+      margin-bottom: 4px;
+    }
+    .filters input[type="date"]:focus,
+    .filters select:focus {
+      border-color: #007bff;
+      outline: none;
+      box-shadow: 0 0 6px rgba(0, 123, 255, 0.4);
+    }
+    .filters > div button {
+      margin-top: 22px;
+      background-color: #007bff;
+      border: none;
+      color: #fff;
+      font-weight: 600;
+      padding: 12px 25px;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0, 123, 255, 0.25);
+    }
+    .filters > div button:hover:not(:disabled) {
+      background-color: #0056b3;
+    }
+    .filters > div button:disabled {
+      background-color: #a3a3a3;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    #table-container {
+      overflow-x: auto;
+      box-shadow: 0 4px 20px rgb(0 0 0 / 0.05);
+      border-radius: 10px;
+      background: #fff;
+      padding: 20px;
+    }
+    table {
+      border-collapse: separate;
+      border-spacing: 0 8px;
+      width: 100%;
+      min-width: 900px;
+      font-size: 14.5px;
+      color: #444;
+    }
+    th, td {
+      padding: 14px 18px;
+      text-align: left;
+      vertical-align: middle;
+      background: #fff;
+      border: none;
+    }
+    th {
+      background-color: #e9f0ff;
+      font-weight: 600;
+      color: #007bff;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    tr:hover td {
+      background-color: #f5faff;
+    }
+    a.link-button {
+      color: #007bff;
+      cursor: pointer;
+      font-weight: 600;
+      text-decoration: underline;
+    }
+    a.link-button:visited {
+      color: #0056b3;
+    }
+    #modal {
+      display: none;
+      position: fixed;
+      z-index: 10000;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.6);
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    #modalContent {
+      background: #fff;
+      width: 100vw;
+      height: 100vh;
+      border-radius: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: start;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 10001;
+    }
+    #modalHeader {
+      padding: 10px 20px;
+      font-weight: 700;
+      font-size: 18px;
+      color: #007bff;
+      border-bottom: 1px solid #ccc;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f9fbff;
+    }
+    #closeModal {
+      cursor: pointer;
+      font-size: 28px;
+      font-weight: 700;
+      color: #007bff;
+      border: none;
+      background: none;
+    }
+    #modalIssues {
+      padding: 0;
+      background: #fff;
+      color: #333;
+      font-size: 0px;
+      font-weight: 500;
+      border-bottom: 1px solid #e2e2e2;
+      white-space: pre-wrap;
+      max-height: none;
+      overflow-y: visible;
+    }
+    #modalIframe {
+      flex: 1;
+      border: none;
+      width: 100%;
+      height: calc(100vh - 160px);
+      margin-top: 0;
+    }
+    #modalFooter {
+      padding: 12px 20px;
+      border-top: 1px solid #ccc;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      background: #f9fbff;
+    }
+    #modalFooter textarea {
+      flex: 1;
+      resize: vertical;
+      min-height: 40px;
+      font-size: 14px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1.8px solid #ccc;
+      transition: border-color 0.3s ease;
+    }
+    #modalFooter textarea:focus {
+      border-color: #007bff;
+      outline: none;
+      box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+    }
+  </style>
 
 </head>
 <body>
