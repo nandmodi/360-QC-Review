@@ -6,7 +6,7 @@
   <link rel="icon" href="https://spyne-prod-ai.s3.us-east-1.amazonaws.com/ai-dataset/2025/favicon.ico" type="image/x-icon" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
   <style>
-    body {
+   body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: #f4f7fa;
     color: #333;
@@ -480,17 +480,20 @@
 
   function loadAndFilterCSV() {
     fetch(CSV_URL).then(res => res.text()).then(csv => {
-      Papa.parse(csv, {
-        header: true, skipEmptyLines: true, transformHeader: h => h.trim(),
-        complete: results => {
-          globalData = results.data;
-          populateDropdowns();
-          applyFilters();
-        }
-      });
+        Papa.parse(csv, {
+            header: true,
+            skipEmptyLines: true,
+            transformHeader: h => h.trim(),
+            complete: results => {
+                globalData = results.data;
+                console.log(globalData); // Debugging: log data to console
+                populateDropdowns();
+                applyFilters();
+            }
+        });
     }).catch(err => {
-      document.getElementById('table-container').innerText = 'Error fetching CSV.';
-      console.error(err);
+        document.getElementById('table-container').innerText = 'Error fetching CSV.';
+        console.error(err);
     });
   }
 
@@ -514,20 +517,26 @@
     const issueFilter = document.getElementById('issueFilter').value.toLowerCase();
 
     filteredData = globalData.filter(row => {
-      const rawDate = row['Date']?.trim();
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(rawDate)) return false;
+        const rawDate = row['Date']?.trim();
+        if (!rawDate || !/^\d{4}-\d{2}-\d{2}$/.test(rawDate)) return false;
 
-      if (!row['User']) return false;
-      if (start && rawDate < start) return false;
-      if (end && rawDate > end) return false;
-      if (user && row['User'].toLowerCase() !== user) return false;
-      if (ent && row['Enterprise'].toLowerCase() !== ent) return false;
+        if (!row['User']) return false;
 
-      const issues = (row['Issues'] || '').toLowerCase().trim();
-      if (issueFilter === 'nullblank' && issues.length > 0) return false;
-      if (issueFilter && issueFilter !== 'nullblank' && !issues.includes(issueFilter)) return false;
+        // Apply date filters
+        if (start && rawDate < start) return false;
+        if (end && rawDate > end) return false;
 
-      return true;
+        // Apply user filter
+        if (user && row['User'].toLowerCase() !== user) return false;
+
+        // Apply enterprise filter
+        if (ent && row['Enterprise'].toLowerCase() !== ent) return false;
+
+        // Apply issue filter
+        const issues = (row['Issues'] || '').toLowerCase().trim();
+        if (issueFilter && issueFilter !== 'nullblank' && !issues.includes(issueFilter)) return false;
+
+        return true;
     });
 
     renderTable(filteredData);
@@ -535,7 +544,7 @@
 
   function renderTable(data) {
     if (!data.length) {
-      document.getElementById('table-container').innerText = 'No matching data.';
+      document.getElementById('table-container').innerText = 'No matching data. Please check your filters.';
       return;
     }
     let html = '<table><tr><th>Date</th><th>Spin_ID</th><th>SKU_ID</th><th>Issues</th><th>Enterprise</th><th>User</th><th>Spin URL</th></tr>';
