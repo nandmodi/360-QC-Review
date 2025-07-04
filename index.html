@@ -133,9 +133,9 @@
       background: #fff;
       width: 100%;
       height: 100%;
-      max-width: 1500px; /* Increased width */
-      max-height: 90%; /* Adjusted height */
-      border-radius: 12px;
+      max-width: none; /* Remove max-width for full-screen */
+      max-height: none; /* Remove max-height for full-screen */
+      border-radius: 0;
       display: flex;
       flex-direction: column;
       justify-content: start;
@@ -169,14 +169,14 @@
       font-weight: 500;
       border-bottom: 1px solid #e2e2e2;
       white-space: pre-wrap;
-      height: auto; /* Adjusted to fill the space */
-      overflow-y: visible;
+      height: auto;
+      overflow-y: visible; /* Make sure no scroll */
     }
     #modalIframe {
       flex: 1;
       border: none;
       width: 100%;
-      height: 100%; /* Increased height for iframe */
+      height: 100%; /* Ensure iframe takes full height */
     }
     #modalFooter {
       padding: 15px 20px;
