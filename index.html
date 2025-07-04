@@ -6,7 +6,15 @@
   <link rel="icon" href="https://spyne-prod-ai.s3.us-east-1.amazonaws.com/ai-dataset/2025/favicon.ico" type="image/x-icon" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
   <style>
-    /body {
+   <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>360 QC Review Dashboard</title>
+  <link rel="icon" href="https://spyne-prod-ai.s3.us-east-1.amazonaws.com/ai-dataset/2025/favicon.ico" type="image/x-icon" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+  <style>
+  body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: #f4f7fa;
     color: #333;
@@ -202,27 +210,237 @@
     outline: none;
     box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
   }
+</style>
 
-    #autocompleteBox {
-      position: absolute;
-      z-index: 10002;
-      background: #fff;
-      border: 1px solid #ccc;
-      max-height: 200px;
-      overflow-y: auto;
-      width: 300px;
-      display: none;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-    }
-    #autocompleteBox div {
-      padding: 8px 12px;
-      cursor: pointer;
-    }
-    #autocompleteBox div:hover {
-      background-color: #f0f8ff;
-    }
+</head>
+<body>
 
-    /* More existing CSS below... */
+<h2>360 QC Review Dashboard</h2>
+
+<div class="filters">
+  <label>Start Date: <input type="date" id="startDate" /></label>
+  <label>End Date: <input type="date" id="endDate" /></label>
+  <label>User: <select id="userFilter"><option value="">All</option></select></label>
+  <label>Enterprise: <select id="enterpriseFilter"><option value="">All</option></select></label>
+  <label>Issue:
+    <select id="issueFilter">
+      <option value="">All</option>
+      <option value="nullblank">Null/Blank</option>
+      <option value="blocker">Blocker</option>
+      <option value="high">High</option>
+      <option value="low">Low</option>
+    </select>
+  </label>
+  <div><button onclick="applyFilters()">Filter</button></div>
+  <div><button onclick="resetFilters()">Reset</button></div>
+</div>
+
+<div id="table-container">Loading...</div>
+
+<div id="modal">
+  <div id="modalContent">
+    <div id="modalHeader">
+      <div>Spin Viewer</div>
+      <button id="closeModal" title="Close">&times;</button>
+    </div>
+    <div id="modalIssues"></div>
+    <iframe id="modalIframe" src=""></iframe>
+    <div id="modalFooter">
+      <textarea id="modalComment" placeholder="Enter your comment here..."></textarea>
+      <button id="modalSubmitBtn">Submit</button>
+    </div>
+  </div>
+</div>
+
+<iframe name="hidden_iframe" style="display:none;"></iframe>
+
+<script>
+  const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vThoeXNovzUYQaHoFqHYY8p4hxrGTJWUPF8dQs0cinxvypfUVwAzFu74l06jhqXm0x611kRke13fa2t/pub?gid=0&single=true&output=csv';
+  const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeQH6R9-rYr1Kh2rwUBKu7uGvJAkRrvx8fnxF6jfkac7sNL2A/formResponse';
+
+  let globalData = [], filteredData = [], currentModalIndex = null;
+
+  function escapeHtml(text) {
+    return text ? text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+                  .replace(/"/g, "&quot;").replace(/'/g, "&#39;") : '';
+  }
+
+  function escapeHtmlAttr(text) {
+    return text ? text.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/'/g, "&#39;")
+                  .replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
+  }
+
+  function loadAndFilterCSV() {
+    fetch(CSV_URL).then(res => res.text()).then(csv => {
+      Papa.parse(csv, {
+        header: true, skipEmptyLines: true, transformHeader: h => h.trim(),
+        complete: results => {
+          globalData = results.data;
+          populateDropdowns();
+          applyFilters();
+        }
+      });
+    }).catch(err => {
+      document.getElementById('table-container').innerText = 'Error fetching CSV.';
+      console.error(err);
+    });
+  }
+
+  function populateDropdowns() {
+    const users = new Set(), enterprises = new Set();
+    globalData.forEach(r => {
+      if (r['User']) users.add(r['User']);
+      if (r['Enterprise']) enterprises.add(r['Enterprise']);
+    });
+    document.getElementById('userFilter').innerHTML =
+      '<option value="">All</option>' + [...users].map(u => `<option>${escapeHtml(u)}</option>`).join('');
+    document.getElementById('enterpriseFilter').innerHTML =
+      '<option value="">All</option>' + [...enterprises].map(e => `<option>${escapeHtml(e)}</option>`).join('');
+  }
+
+  function applyFilters() {
+    const start = document.getElementById('startDate').value;
+    const end = document.getElementById('endDate').value;
+    const user = document.getElementById('userFilter').value.toLowerCase();
+    const ent = document.getElementById('enterpriseFilter').value.toLowerCase();
+    const issueFilter = document.getElementById('issueFilter').value.toLowerCase();
+
+    filteredData = globalData.filter(row => {
+      const rawDate = row['Date']?.trim();
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(rawDate)) return false;
+
+      if (!row['User']) return false;
+      if (start && rawDate < start) return false;
+      if (end && rawDate > end) return false;
+      if (user && row['User'].toLowerCase() !== user) return false;
+      if (ent && row['Enterprise'].toLowerCase() !== ent) return false;
+
+      const issues = (row['Issues'] || '').toLowerCase().trim();
+      if (issueFilter === 'nullblank' && issues.length > 0) return false;
+      if (issueFilter && issueFilter !== 'nullblank' && !issues.includes(issueFilter)) return false;
+
+      return true;
+    });
+
+    renderTable(filteredData);
+  }
+
+  function renderTable(data) {
+    if (!data.length) {
+      document.getElementById('table-container').innerText = 'No matching data.';
+      return;
+    }
+    let html = `<table><tr><th>Date</th><th>Spin_ID</th><th>SKU_ID</th><th>Issues</th><th>Enterprise</th><th>User</th><th>Spin URL</th></tr>`;
+    data.forEach((r, i) => {
+      const submitted = r._submitted || false;
+      const linkClass = submitted ? 'link-button disabled' : 'link-button';
+      const style = submitted ? 'pointer-events:none;color:gray;text-decoration:none;' : '';
+      html += `<tr><td>${escapeHtml(r['Date'])}</td><td>${escapeHtml(r['Spin_ID'])}</td><td>${escapeHtml(r['SKU_ID'])}</td>
+               <td>${escapeHtml(r['Issues'] || '').replace(/\n/g, '<br>')}</td><td>${escapeHtml(r['Enterprise'])}</td><td>${escapeHtml(r['User'])}</td>
+               <td><a class="${linkClass}" style="${style}" onclick="openModal(${i})" href="javascript:void(0)">View Spin</a></td></tr>`;
+    });
+    document.getElementById('table-container').innerHTML = html + '</table>';
+  }
+
+  function resetFilters() {
+    document.getElementById('startDate').value = '';
+    document.getElementById('endDate').value = '';
+    document.getElementById('userFilter').value = '';
+    document.getElementById('enterpriseFilter').value = '';
+    document.getElementById('issueFilter').value = '';
+    renderTable(globalData);
+  }
+
+  function openModal(i) {
+    currentModalIndex = i;
+    const row = filteredData[i];
+    document.getElementById('modalIframe').src = row['spin_url'] || '';
+    const issues = row['Issues'] || 'No issues reported.';
+    const validation1 = row['validation_failure_reason'] || '';
+    const validation2 = row['vdp_validation_failure_reason'] || '';
+    const validation = [validation1, validation2].filter(Boolean).join(', ') || 'No validation error.';
+    const enterprise = row['Enterprise'] || 'N/A';
+    const sku = row['SKU_ID'] || 'N/A';
+    const spin = row['Spin_ID'] || 'N/A';
+
+    document.getElementById('modalIssues').innerHTML = `
+      <table style="width:100%; border-collapse: collapse;">
+        <tr>
+          <td rowspan="2" style="border:1px solid #ccc; padding:8px; vertical-align: top;"><strong>Issue</strong><br>${escapeHtml(issues).replace(/\n/g, '<br>')}</td>
+          <td style="border:1px solid #ccc; padding:8px;"><strong>Enterprise</strong><br>${escapeHtml(enterprise)}</td>
+          <td style="border:1px solid #ccc; padding:8px;"><strong>SKU ID</strong><br>${escapeHtml(sku)}</td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #ccc; padding:8px;"><strong>Validation</strong><br>${escapeHtml(validation)}</td>
+          <td style="border:1px solid #ccc; padding:8px;"><strong>Spin ID</strong><br>${escapeHtml(spin)}</td>
+        </tr>
+      </table>
+    `;
+    document.getElementById('modalComment').value = '';
+    document.getElementById('modal').style.display = 'flex';
+  }
+
+  function closeModal() {
+    document.getElementById('modal').style.display = 'none';
+    document.getElementById('modalIframe').src = '';
+  }
+
+  document.getElementById('closeModal').onclick = closeModal;
+
+  document.getElementById('modalSubmitBtn').onclick = () => {
+    if (currentModalIndex === null) return;
+    const comment = document.getElementById('modalComment').value.trim() || 'Done';
+    submitFormRow(currentModalIndex, comment);
+  };
+
+  document.getElementById('modalComment').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      document.getElementById('modalSubmitBtn').click();
+    }
+  });
+
+  function submitFormRow(i, commentValue) {
+    const row = filteredData[i];
+    const form = document.createElement("form");
+    form.action = FORM_URL;
+    form.method = "POST";
+    form.target = "hidden_iframe";
+    form.style.display = "none";
+    form.innerHTML = `
+      <input name="entry.1125049159" value="${escapeHtmlAttr(row['Spin_ID'])}">
+      <input name="entry.703277665" value="${escapeHtmlAttr(row['SKU_ID'])}">
+      <input name="entry.1815472287" value="${escapeHtmlAttr(row['Enterprise'])}">
+      <input name="entry.582537694" value="${escapeHtmlAttr(row['User'])}">
+      <input name="entry.575622617" value="${escapeHtmlAttr(row['Issues'])}">
+      <input name="entry.1751143375" value="${escapeHtmlAttr(commentValue)}">
+      <input name="entry.1372347436" value="${escapeHtmlAttr(row['spin_url'])}">
+    `;
+    const iframe = document.getElementsByName('hidden_iframe')[0];
+    iframe.onload = () => {
+      filteredData[i]._submitted = true;
+      renderTable(filteredData);
+      closeModal();
+      const nextIndex = filteredData.findIndex((r, idx) => idx > i && !r._submitted);
+      if (nextIndex !== -1) setTimeout(() => openModal(nextIndex), 300);
+    };
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+  }
+
+  window.onload = () => {
+    const today = new Date().toISOString().split('T')[0];
+    const lastWeek = new Date();
+    lastWeek.setDate(lastWeek.getDate() - 7);
+    document.getElementById('endDate').value = today;
+    document.getElementById('startDate').value = lastWeek.toISOString().split('T')[0];
+    loadAndFilterCSV();
+  };
+</script>
+
+</body>
+</html>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: #f4f7fa;
@@ -420,6 +638,7 @@
       box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
     }
   </style>
+
 </head>
 <body>
 
@@ -480,20 +699,18 @@
 
   function loadAndFilterCSV() {
     fetch(CSV_URL).then(res => res.text()).then(csv => {
-        Papa.parse(csv, {
-            header: true,
-            skipEmptyLines: true,
-            transformHeader: h => h.trim(),
-            complete: results => {
-                globalData = results.data;
-                console.log(globalData); // Debugging: log data to console
-                populateDropdowns();
-                applyFilters();
-            }
-        });
+      Papa.parse(csv, {
+        header: true, skipEmptyLines: true, transformHeader: h => h.trim(),
+        complete: results => {
+          globalData = results.data;
+          console.log(globalData); // Debugging: log data to console
+          populateDropdowns();
+          applyFilters();
+        }
+      });
     }).catch(err => {
-        document.getElementById('table-container').innerText = 'Error fetching CSV.';
-        console.error(err);
+      document.getElementById('table-container').innerText = 'Error fetching CSV.';
+      console.error(err);
     });
   }
 
@@ -517,26 +734,20 @@
     const issueFilter = document.getElementById('issueFilter').value.toLowerCase();
 
     filteredData = globalData.filter(row => {
-        const rawDate = row['Date']?.trim();
-        if (!rawDate || !/^\d{4}-\d{2}-\d{2}$/.test(rawDate)) return false;
+      const rawDate = row['Date']?.trim();
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(rawDate)) return false;
 
-        if (!row['User']) return false;
+      if (!row['User']) return false;
+      if (start && rawDate < start) return false;
+      if (end && rawDate > end) return false;
+      if (user && row['User'].toLowerCase() !== user) return false;
+      if (ent && row['Enterprise'].toLowerCase() !== ent) return false;
 
-        // Apply date filters
-        if (start && rawDate < start) return false;
-        if (end && rawDate > end) return false;
+      const issues = (row['Issues'] || '').toLowerCase().trim();
+      if (issueFilter === 'nullblank' && issues.length > 0) return false;
+      if (issueFilter && issueFilter !== 'nullblank' && !issues.includes(issueFilter)) return false;
 
-        // Apply user filter
-        if (user && row['User'].toLowerCase() !== user) return false;
-
-        // Apply enterprise filter
-        if (ent && row['Enterprise'].toLowerCase() !== ent) return false;
-
-        // Apply issue filter
-        const issues = (row['Issues'] || '').toLowerCase().trim();
-        if (issueFilter && issueFilter !== 'nullblank' && !issues.includes(issueFilter)) return false;
-
-        return true;
+      return true;
     });
 
     renderTable(filteredData);
@@ -547,7 +758,7 @@
       document.getElementById('table-container').innerText = 'No matching data. Please check your filters.';
       return;
     }
-    let html = '<table><tr><th>Date</th><th>Spin_ID</th><th>SKU_ID</th><th>Issues</th><th>Enterprise</th><th>User</th><th>Spin URL</th></tr>';
+    let html = `<table><tr><th>Date</th><th>Spin_ID</th><th>SKU_ID</th><th>Issues</th><th>Enterprise</th><th>User</th><th>Spin URL</th></tr>`;
     data.forEach((r, i) => {
       const submitted = r._submitted || false;
       const linkClass = submitted ? 'link-button disabled' : 'link-button';
