@@ -354,6 +354,7 @@
     const enterprise = row['Enterprise'] || 'N/A';
     const sku = row['SKU_ID'] || 'N/A';
     const spin = row['Spin_ID'] || 'N/A';
+    const user = row['User'] || 'N/A';  // Add user here
 
     document.getElementById('modalIssues').innerHTML = `
       <table style="width:100%; border-collapse: collapse;">
@@ -365,6 +366,9 @@
         <tr>
           <td style="border:1px solid #ccc; padding:8px;"><strong>Validation</strong><br>${escapeHtml(validation)}</td>
           <td style="border:1px solid #ccc; padding:8px;"><strong>Spin ID</strong><br>${escapeHtml(spin)}</td>
+        </tr>
+        <tr>
+          <td colspan="2" style="border:1px solid #ccc; padding:8px;" colspan="2"><strong>User</strong><br>${escapeHtml(user)}</td>
         </tr>
       </table>
     `;
