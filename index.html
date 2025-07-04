@@ -359,16 +359,16 @@
     document.getElementById('modalIssues').innerHTML = `
       <table style="width:100%; border-collapse: collapse;">
         <tr>
-          <td rowspan="2" style="border:1px solid #ccc; padding:8px; vertical-align: top;"><strong>Issue</strong><br>${escapeHtml(issues).replace(/\n/g, '<br>')}</td>
-          <td style="border:1px solid #ccc; padding:8px;"><strong>Enterprise</strong><br>${escapeHtml(enterprise)}</td>
-          <td style="border:1px solid #ccc; padding:8px;"><strong>Validation</strong><br>${escapeHtml(validation)}</td>
+          <td rowspan="2" style="border:1px solid #ccc; padding:8px; vertical-align: top; height: 100px;"><strong>Issue</strong><br>${escapeHtml(issues).replace(/\n/g, '<br>')}</td>
+          <td style="border:1px solid #ccc; padding:8px; height: 100px;"><strong>Enterprise</strong><br>${escapeHtml(enterprise)}</td>
+          <td style="border:1px solid #ccc; padding:8px; height: 100px;"><strong>Validation</strong><br>${escapeHtml(validation)}</td>
         </tr>
         <tr>
-          <td style="border:1px solid #ccc; padding:8px;"><strong>SKU ID</strong><br>${escapeHtml(sku)}</td>
-          <td style="border:1px solid #ccc; padding:8px;"><strong>Spin ID</strong><br>${escapeHtml(spin)}</td>
+          <td style="border:1px solid #ccc; padding:8px; height: 100px;"><strong>SKU ID</strong><br>${escapeHtml(sku)}</td>
+          <td style="border:1px solid #ccc; padding:8px; height: 100px;"><strong>Spin ID</strong><br>${escapeHtml(spin)}</td>
         </tr>
         <tr>
-          <td colspan="3" style="border:1px solid #ccc; padding:8px;"><strong>User</strong><br>${escapeHtml(user)}</td>
+          <td colspan="3" style="border:1px solid #ccc; padding:8px; height: 100px;"><strong>User</strong><br>${escapeHtml(user)}</td>
         </tr>
       </table>
     `;
@@ -417,8 +417,11 @@
       filteredData[i]._submitted = true;
       renderTable(filteredData);
       closeModal();
+      // Open next unsubmitted spin after the current one is submitted
       const nextIndex = filteredData.findIndex((r, idx) => idx > i && !r._submitted);
-      if (nextIndex !== -1) setTimeout(() => openModal(nextIndex), 300);
+      if (nextIndex !== -1) {
+        openModal(nextIndex);
+      }
     };
     document.body.appendChild(form);
     form.submit();
