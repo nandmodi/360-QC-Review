@@ -131,23 +131,22 @@
     }
     #modalContent {
       background: #fff;
-      width: 100vw;
-      height: 100vh;
-      border-radius: 0;
+      width: 80%;
+      max-width: 900px;
+      height: auto;
+      border-radius: 12px;
       display: flex;
       flex-direction: column;
       justify-content: start;
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: 10001;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
     }
     #modalHeader {
-      padding: 10px 20px;
+      padding: 20px;
       font-weight: 700;
-      font-size: 18px;
+      font-size: 22px;
       color: #007bff;
-      border-bottom: 1px solid #ccc;
+      border-bottom: 2px solid #ccc;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -155,44 +154,43 @@
     }
     #closeModal {
       cursor: pointer;
-      font-size: 28px;
+      font-size: 30px;
       font-weight: 700;
       color: #007bff;
       border: none;
       background: none;
     }
     #modalIssues {
-      padding: 0;
+      padding: 20px;
       background: #fff;
       color: #333;
-      font-size: 0px;
+      font-size: 16px;
       font-weight: 500;
       border-bottom: 1px solid #e2e2e2;
       white-space: pre-wrap;
-      max-height: none;
-      overflow-y: visible;
+      max-height: 300px;
+      overflow-y: auto;
     }
     #modalIframe {
       flex: 1;
       border: none;
       width: 100%;
-      height: calc(100vh - 160px);
-      margin-top: 0;
+      height: 300px;
     }
     #modalFooter {
-      padding: 12px 20px;
+      padding: 15px 20px;
       border-top: 1px solid #ccc;
       display: flex;
-      gap: 10px;
+      gap: 15px;
       align-items: center;
       background: #f9fbff;
     }
     #modalFooter textarea {
       flex: 1;
       resize: vertical;
-      min-height: 40px;
+      min-height: 50px;
       font-size: 14px;
-      padding: 8px 12px;
+      padding: 10px 15px;
       border-radius: 6px;
       border: 1.8px solid #ccc;
       transition: border-color 0.3s ease;
@@ -201,6 +199,18 @@
       border-color: #007bff;
       outline: none;
       box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+    }
+    #modalFooter button {
+      padding: 12px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    #modalFooter button:hover {
+      background-color: #0056b3;
     }
   </style>
 
