@@ -463,45 +463,10 @@
 <iframe name="hidden_iframe" style="display:none;"></iframe>
 
 <script>
-  const suggestions = [
-    "Angle Placement", "CompleteCar – RBG", "Exposure", "Mirror – RBG", "Placement", "Shadow", 
-    "Window & See through", "TyreCut – RBG", "EndStart: Studio", "Colmap", "Body Smoothening", 
-    "Warping", "Image-Processed", "Banner-Sticker", "Anteenas – RBG", "SideStep – RBG", 
-    "Body Reflections", "NumberPlate", "RoofRail – RBG", "Tilt", "Window SticKers", 
-    "Edges White", "Artifacts", "Floor", "Text & Logos", "No-Space", "Studio-Background"
-  ];
+  const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSo76L7XI-AHGphJRHyTXCwMVuizeUUfb23MlzOvKRJBXF4JccS_gl5koNEzy6I61crp7dLXYPvYP2W/pub?gid=0&single=true&output=csv';
+  const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeQH6R9-rYr1Kh2rwUBKu7uGvJAkRrvx8fnxF6jfkac7sNL2A/formResponse';
 
-  const commentBox = document.getElementById("modalComment");
-  const box = document.getElementById("autocompleteBox");
-
-  commentBox.addEventListener("input", function () {
-    const input = this.value.split(/\s|,|;/).pop().trim().toLowerCase();
-    if (!input) return box.style.display = "none";
-
-    const matches = suggestions.filter(s => s.toLowerCase().includes(input));
-    if (!matches.length) return box.style.display = "none";
-
-    box.innerHTML = matches.map(m => `<div>${m}</div>`).join('');
-    const rect = commentBox.getBoundingClientRect();
-    box.style.left = rect.left + 'px';
-    box.style.top = (rect.bottom + window.scrollY) + 'px';
-    box.style.display = 'block';
-  });
-
-  box.addEventListener("click", function (e) {
-    if (e.target.tagName === "DIV") {
-      const words = commentBox.value.split(/\s|,|;/);
-      words.pop();
-      words.push(e.target.innerText);
-      commentBox.value = words.join(' ') + ' ';
-      box.style.display = "none";
-      commentBox.focus();
-    }
-  });
-
-  document.addEventListener("click", function (e) {
-    if (e.target !== commentBox && e.target.parentNode !== box) box.style.display = "none";
-  });
+  let globalData = [], filteredData = [], currentModalIndex = null;
 
   function escapeHtml(text) {
     return text ? text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
