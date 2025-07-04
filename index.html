@@ -130,18 +130,18 @@
     overflow: hidden;
   }
   #modalContent {
-  background: #fff;
-  width: 100vw;
-  height: 100vh;
-  border-radius: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: start;
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 10001;
-}
+    background: #fff;
+    width: 80vw;
+    height: 80vh;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    position: fixed;
+    top: 10vh;
+    left: 10vw;
+    z-index: 10001;
+  }
   #modalHeader {
     padding: 10px 20px;
     font-weight: 700;
@@ -162,23 +162,17 @@
     background: none;
   }
   #modalIssues {
-  padding: 0;
-  background: #fff;
-  color: #333;
-  font-size: 0px;
-  font-weight: 500;
-  border-bottom: 1px solid #e2e2e2;
-  white-space: pre-wrap;
-  max-height: none;
-  overflow-y: visible;
-}
+    padding: 10px;
+    max-height: 50vh;
+    overflow-y: auto;
+  }
   #modalIframe {
-  flex: 1;
-  border: none;
-  width: 100%;
-  height: calc(100vh - 160px);
-  margin-top: 0;
-}
+    flex: 1;
+    border: none;
+    width: 100%;
+    height: calc(100vh - 220px);
+    margin-top: 0;
+  }
   #modalFooter {
     padding: 12px 20px;
     border-top: 1px solid #ccc;
@@ -188,15 +182,15 @@
     background: #f9fbff;
   }
   #modalFooter textarea {
-  flex: 1;
-  resize: vertical;
-  min-height: 40px;
-  font-size: 14px;
-  padding: 8px 12px;
-  border-radius: 6px;
-  border: 1.8px solid #ccc;
-  transition: border-color 0.3s ease;
-}
+    flex: 1;
+    resize: vertical;
+    min-height: 40px;
+    font-size: 14px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1.8px solid #ccc;
+    transition: border-color 0.3s ease;
+  }
   #modalFooter textarea:focus {
     border-color: #007bff;
     outline: none;
@@ -235,7 +229,9 @@
       <div>Spin Viewer</div>
       <button id="closeModal" title="Close">&times;</button>
     </div>
-    <div id="modalIssues"></div>
+    <div id="modalIssues">
+      <!-- Table content will be injected dynamically here -->
+    </div>
     <iframe id="modalIframe" src=""></iframe>
     <div id="modalFooter">
       <textarea id="modalComment" placeholder="Enter your comment here..."></textarea>
@@ -257,11 +253,6 @@
                   .replace(/"/g, "&quot;").replace(/'/g, "&#39;") : '';
   }
 
-  function escapeHtmlAttr(text) {
-    return text ? text.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/'/g, "&#39;")
-                  .replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
-  }
-
   function loadAndFilterCSV() {
     fetch(CSV_URL).then(res => res.text()).then(csv => {
       Papa.parse(csv, {
@@ -276,18 +267,6 @@
       document.getElementById('table-container').innerText = 'Error fetching CSV.';
       console.error(err);
     });
-  }
-
-  function populateDropdowns() {
-    const users = new Set(), enterprises = new Set();
-    globalData.forEach(r => {
-      if (r['User']) users.add(r['User']);
-      if (r['Enterprise']) enterprises.add(r['Enterprise']);
-    });
-    document.getElementById('userFilter').innerHTML =
-      '<option value="">All</option>' + [...users].map(u => `<option>${escapeHtml(u)}</option>`).join('');
-    document.getElementById('enterpriseFilter').innerHTML =
-      '<option value="">All</option>' + [...enterprises].map(e => `<option>${escapeHtml(e)}</option>`).join('');
   }
 
   function applyFilters() {
@@ -334,15 +313,6 @@
     document.getElementById('table-container').innerHTML = html + '</table>';
   }
 
-  function resetFilters() {
-    document.getElementById('startDate').value = '';
-    document.getElementById('endDate').value = '';
-    document.getElementById('userFilter').value = '';
-    document.getElementById('enterpriseFilter').value = '';
-    document.getElementById('issueFilter').value = '';
-    renderTable(globalData);
-  }
-
   function openModal(i) {
     currentModalIndex = i;
     const row = filteredData[i];
@@ -359,16 +329,16 @@
     document.getElementById('modalIssues').innerHTML = `
       <table style="width:100%; border-collapse: collapse;">
         <tr>
-          <td rowspan="2" style="border:1px solid #ccc; padding:8px; vertical-align: top; height: 100px;"><strong>Issue</strong><br>${escapeHtml(issues).replace(/\n/g, '<br>')}</td>
-          <td style="border:1px solid #ccc; padding:8px; height: 100px;"><strong>Enterprise</strong><br>${escapeHtml(enterprise)}</td>
-          <td style="border:1px solid #ccc; padding:8px; height: 100px;"><strong>Validation</strong><br>${escapeHtml(validation)}</td>
+          <td rowspan="2" style="border:1px solid #ccc; padding:8px; vertical-align: top; height: 80px;"><strong>Issue</strong><br>${escapeHtml(issues).replace(/\n/g, '<br>')}</td>
+          <td style="border:1px solid #ccc; padding:8px; height: 80px;"><strong>Enterprise</strong><br>${escapeHtml(enterprise)}</td>
+          <td style="border:1px solid #ccc; padding:8px; height: 80px;"><strong>Validation</strong><br>${escapeHtml(validation)}</td>
         </tr>
         <tr>
-          <td style="border:1px solid #ccc; padding:8px; height: 100px;"><strong>SKU ID</strong><br>${escapeHtml(sku)}</td>
-          <td style="border:1px solid #ccc; padding:8px; height: 100px;"><strong>Spin ID</strong><br>${escapeHtml(spin)}</td>
+          <td style="border:1px solid #ccc; padding:8px; height: 80px;"><strong>SKU ID</strong><br>${escapeHtml(sku)}</td>
+          <td style="border:1px solid #ccc; padding:8px; height: 80px;"><strong>Spin ID</strong><br>${escapeHtml(spin)}</td>
         </tr>
         <tr>
-          <td colspan="3" style="border:1px solid #ccc; padding:8px; height: 100px;"><strong>User</strong><br>${escapeHtml(user)}</td>
+          <td colspan="3" style="border:1px solid #ccc; padding:8px; height: 80px;"><strong>User</strong><br>${escapeHtml(user)}</td>
         </tr>
       </table>
     `;
@@ -388,13 +358,6 @@
     const comment = document.getElementById('modalComment').value.trim() || 'Done';
     submitFormRow(currentModalIndex, comment);
   };
-
-  document.getElementById('modalComment').addEventListener('keydown', function (e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      document.getElementById('modalSubmitBtn').click();
-    }
-  });
 
   function submitFormRow(i, commentValue) {
     const row = filteredData[i];
