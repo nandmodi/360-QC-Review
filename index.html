@@ -154,30 +154,30 @@
       text-decoration: line-through;
     }
 
-    /* Modal Styling */
+    /* Full-Screen Modal Styling */
     #modal {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.85);
+      background: white; /* Changed from semi-transparent to solid white for full screen effect */
       z-index: 1000;
-      padding: 20px;
+      padding: 0; /* Remove padding for true full screen */
       align-items: center;
       justify-content: center;
     }
 
     #modalContent {
       background: white;
-      width: 95%;
-      height: 95%;
-      border-radius: 12px;
+      width: 100%;
+      height: 100%;
+      border-radius: 0; /* Remove rounded corners for full screen */
       display: flex;
       flex-direction: column;
       overflow: hidden;
     }
 
     #modalHeader {
-      padding: 15px 20px;
+      padding: 15px 25px;
       background: #f8fafc;
       border-bottom: 1px solid #e2e8f0;
       display: flex;
@@ -186,7 +186,7 @@
     }
 
     #modalIssues {
-      padding: 10px 20px;
+      padding: 12px 25px;
       background: #fff;
       font-size: 13px;
       border-bottom: 1px solid #e2e8f0;
@@ -199,19 +199,21 @@
     }
 
     #modalFooter {
-      padding: 15px 20px;
+      padding: 20px 25px;
       display: flex;
       gap: 15px;
       background: #f8fafc;
       align-items: center;
+      border-top: 1px solid #e2e8f0;
     }
 
     #modalComment {
       flex: 1;
-      padding: 10px;
+      padding: 12px 15px;
       border-radius: 6px;
       border: 1px solid var(--border);
       font-family: inherit;
+      font-size: 14px;
     }
 
     .loader {
@@ -266,14 +268,14 @@
 <div id="modal">
   <div id="modalContent">
     <div id="modalHeader">
-      <div id="modalTitle" style="font-weight: 600;">Spin Review</div>
-      <button onclick="closeModal()" style="background:none; font-size: 24px; border:none; cursor:pointer;">&times;</button>
+      <div id="modalTitle" style="font-weight: 600; font-size: 1.1rem;">Spin Review</div>
+      <button onclick="closeModal()" style="background:none; font-size: 32px; border:none; cursor:pointer; line-height: 1;">&times;</button>
     </div>
     <div id="modalIssues"></div>
     <iframe id="modalIframe"></iframe>
     <div id="modalFooter">
       <input type="text" id="modalComment" placeholder="Add QC feedback or notes..." />
-      <button class="btn-primary" id="modalSubmitBtn">Submit & Next</button>
+      <button class="btn-primary" id="modalSubmitBtn" style="padding: 12px 30px;">Submit & Next</button>
     </div>
   </div>
 </div>
@@ -352,8 +354,6 @@
       const rowEnt = row['Enterprise'] || '';
       const rowIssues = (row['Issues'] || '').toLowerCase();
       
-      // CRITICAL: Filter out rows that have ANY value in the "Status" column
-      // We check for 'Status' or 'status' in case of header variations
       const rowStatus = (row['Status'] || row['status'] || '').trim();
       if (rowStatus !== '') return false;
 
@@ -439,7 +439,7 @@
     commentInput.value = '';
     
     issuesDiv.innerHTML = `
-      <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 15px;">
+      <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 20px;">
         <div><strong>Issue Details:</strong><br>${escapeHtml(row['Issues'] || 'None Reported')}</div>
         <div><strong>Enterprise:</strong><br>${escapeHtml(row['Enterprise'])}</div>
         <div><strong>Spin ID:</strong><br><code>${escapeHtml(row['Spin_ID'])}</code></div>
@@ -448,11 +448,16 @@
 
     document.getElementById('modal').style.display = 'flex';
     commentInput.focus();
+    
+    // Disable scrolling on body when modal is open
+    document.body.style.overflow = 'hidden';
   }
 
   function closeModal() {
     document.getElementById('modal').style.display = 'none';
     document.getElementById('modalIframe').src = '';
+    // Re-enable scrolling on body
+    document.body.style.overflow = 'auto';
   }
 
   function resetFilters() {
@@ -496,16 +501,11 @@
 
     document.body.appendChild(form);
     
-    // Handle the visual update after submission
     const iframe = document.getElementById('hidden_iframe');
     iframe.onload = () => {
-      // Mark as submitted locally so it disappears from view
       filteredData[currentModalIndex]._locallySubmitted = true;
-      
-      // Update the main view
       renderTable();
       
-      // Auto-move to next item
       const nextIndex = filteredData.findIndex((r, idx) => idx > currentModalIndex && !r._locallySubmitted);
       if (nextIndex !== -1) {
         openModal(nextIndex);
